@@ -17,7 +17,7 @@ function newGame(mode, pw, depth, startF = 1, preview = false) {
   password = runMode === 'daily' ? 'きょうの' + daily : runMode === 'pw' ? String(pw).trim().slice(0, 24) : randomPw();
   if (runMode === 'pw' && !normPw(password)) { password = randomPw(); runMode = 'random'; }
   setupDungeon(runMode === 'pw' && DEPTHS.includes(+depth) ? +depth : 10);
-  Object.assign(P, { hp: 30, mhp: 30, mp: 10, mmp: 10, atk: 4, def: 0, lv: 1, exp: 0, food: 100, gold: 0, dir: [0, 1], inv: [{ k: 'bread', traits: [] }, { k: 'herb', traits: [] }, { k: 'sword', plus: 0, traits: [] }, { k: 'arrow', n: 5, traits: [] }], turn: 0, skip: 0, known: new Set(), visits: {}, cause: '', wasInShop: false, pinch: false });
+  Object.assign(P, { hp: 30, mhp: 30, mp: 10, mmp: 10, atk: 4, def: 0, lv: 1, exp: 0, food: 100, gold: 0, dir: [0, 1], inv: [{ k: 'bread', traits: [] }, { k: 'herb', traits: [] }, { k: 'sword', plus: 0, traits: [] }, { k: 'arrow', n: 5, traits: [] }], turn: 0, skip: 0, furi: 0, backF: 0, known: new Set(), visits: {}, cause: '', wasInShop: false, pinch: false });
   const banked = preview ? null : bankSuspended(); applyJobStart(); const carried = preview ? 0 : applyHeroStart();
   logs.length = 0; logAll.length = 0; enterFloor(startF > 1 && startF <= LAST ? startF : 1); say(runMode === 'daily' ? `今日のダンジョン（${daily}）に 入った。だれが遊んでも 同じ地図だ。` : `合言葉「${password}」の 地下${LAST}階ダンジョンに 入った。同じ合言葉なら、だれでも 同じダンジョンだ。`); say(`職業は「${jobOf().name}」。わざは Mキーか「わざ」ボタンで 見られる。`); if (banked !== null) say(`中断していた 冒険の 装備（${banked}こ）と お金・レベルを 冒険者データに のこした。`); if (P.lv > 1 || carried) say(`冒険者データを ひきついだ：Lv${P.lv}・${P.gold}G${carried ? `・装備 ${carried}こ` : ''}。`); if (G.f > 1) say(`地下${G.f}階から 再開した。`); hideOver();
   if (treasure) { say('ここは「おたからダンジョン」！ レアな 道具や お金が 見つかりやすい。'); showBanner('おたからダンジョン！', 'レアな 道具が 出やすい'); } }
@@ -29,10 +29,17 @@ function setupDungeon(depth) {
   // おたからダンジョン：合言葉で きまる（8つに 1つくらい）。同じ合言葉なら だれでも 同じ
   treasure = hashSeed('kind:' + normPw(password)) % 8 === 0;
   shuffleFake(); }
+// もどりの まほうじん：スタートの 部屋で、スタートに いちばん 近い あいている マスに おく
+function placePortal(to) { const r = G.rooms ? G.rooms[0] : null, s = G.start; let best = null, bd = 1e9;
+  if (r) for (let y = r.y; y < r.y + r.h; y++) for (let x = r.x; x < r.x + r.w; x++) { if (x === s.x && y === s.y) continue;
+    if (G.items.some(o => o.x === x && o.y === y) || G.traps.some(o => o.x === x && o.y === y) || G.mons.some(o => o.x === x && o.y === y) || (G.stairs.x === x && G.stairs.y === y) || (G.shop && G.shop.x === x && G.shop.y === y) || (G.npc && G.npc.x === x && G.npc.y === y)) continue;
+    const d = Math.abs(x - s.x) + Math.abs(y - s.y); if (d < bd) { bd = d; best = { x, y }; } }
+  G.portal = best ? { ...best, to } : null; }
 function enterFloor(f) {
   if (typeof mmw !== 'undefined') mmw.classList.remove('big');
   const unpaid = P.inv.filter(o => o.unpaid); if (unpaid.length) { for (const o of unpaid) delete o.unpaid; say('お金を はらわずに にげきった……！'); }
   P.buffAtk = 0; G = genFloor(f); P.x = G.start.x; P.y = G.start.y; if (jobHas('trapper')) for (const t of G.traps) t.found = true; P.wasInShop = false; reveal();
+  if (f !== 1) P.backF = 0; else if (P.backF > 1) placePortal(P.backF);
   if (G.shop) say('この階には「AIかじや」が いるらしい。');
   if (f === LAST) { showBanner('でかこわの王の階', 'たおせば クリア'); shake(8); sfx('boss'); }
   if (!previewRun) { noteDepth(f); noteCheckpoint(f); markFloorStart(); }

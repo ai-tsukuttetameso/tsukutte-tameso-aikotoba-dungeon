@@ -9,6 +9,7 @@ function drawMini(tt) {
   const k = 3; mg.clearRect(0, 0, mm.width, mm.height);
   for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) { if (G.map[y][x] === 0 || !(G.seen[y][x] || G.known)) continue;
     mg.fillStyle = !G.seen[y][x] ? 'rgba(150,140,200,.4)' : G.map[y][x] === 1 ? 'rgba(90,120,255,.55)' : 'rgba(140,160,255,.45)'; mg.fillRect(x * k, y * k, k, k); }
+  if (G.portal) { mg.fillStyle = '#c08cff'; mg.fillRect(G.portal.x * k - 1, G.portal.y * k - 1, k + 2, k + 2); }
   if (G.seen[G.stairs.y][G.stairs.x] || G.known) { mg.fillStyle = '#7cf0a0'; mg.fillRect(G.stairs.x * k - 1, G.stairs.y * k - 1, k + 2, k + 2); }
   if (G.npc && G.seen[G.npc.y][G.npc.x]) { mg.fillStyle = '#7cf0a0'; mg.fillRect(G.npc.x * k, G.npc.y * k, k, k); }
   if (G.shop && G.seen[G.shop.y][G.shop.x]) { mg.fillStyle = '#ffd23f'; mg.fillRect(G.shop.x * k - 1, G.shop.y * k - 1, k + 2, k + 2); }

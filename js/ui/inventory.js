@@ -25,7 +25,7 @@ invpop.addEventListener('click', e => { const b = e.target.closest('button'); if
   if (invpop.dataset.mode === 'shop') { shopClick(b); return; }
   if (invpop.dataset.mode === 'bag') { bagClick(b); return; }
   if (invpop.dataset.mode === 'bags') { bagsClick(b); return; }
-  if (b.dataset.bags) { drawBags(); return; }
+  if (b.dataset.bags) { openBags(); return; }
   if (b.dataset.stash) { stashAll(); render(); drawInvPop(); return; }
   if (invpop.dataset.mode === 'quit') { quitClick(b); return; }
   if (invpop.dataset.mode === 'log' || invpop.dataset.mode === 'save') return;

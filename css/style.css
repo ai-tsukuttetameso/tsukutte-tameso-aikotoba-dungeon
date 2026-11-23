@@ -234,3 +234,16 @@ textarea.code{width:100%;font-family:monospace;font-size:13px;background:#17122a
 .invpop .sortrow button{margin:0;font-size:13px;padding:3px 10px;border-radius:14px}
 .invpop .sortrow button.on{background:#ffd23f;color:#17122a;border-color:#ffd23f}
 @media (max-width:640px){.invpop .invtabs{top:-6px}.invpop .sortrow{gap:3px;font-size:12px}.invpop .sortrow button{min-height:32px;font-size:12px;padding:2px 7px}}
+/* お店：上の 見出しを 固定 */
+.invpop .pophead{position:sticky;top:-8px;z-index:1;background:#17122a;margin:-8px -8px 4px;padding:8px 8px 2px;border-bottom:1px solid #4d4080}
+.invpop .pophead .tabs{border-bottom:0;margin-bottom:2px;padding-bottom:4px}
+.invpop .pophead .pay{max-height:28vh;overflow:auto}
+@media (max-width:640px){.invpop .pophead{top:-6px;margin:-6px -6px 4px;padding:6px 6px 2px}}
+/* 袋の 中の 物を すてる */
+.invpop button.toss{color:#ff9a9a}.invpop button.toss.ask{background:#5a0a14;border-color:#ff6b6b;color:#fff}
+/* お店：まとめて うる */
+.invpop .multirow{display:flex;flex-wrap:wrap;gap:4px;margin:4px 0}.invpop .multirow button{margin:0}
+.invpop .multirow button.on{background:#ffd23f;color:#17122a;border-color:#ffd23f}
+.invpop button.pick.on{border-color:#ffd23f;background:#3a2f66}.invpop .ck{color:#ffd23f}
+.invpop .multibar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:#3a1a2a;border:1px solid #ffd23f;border-radius:6px;padding:4px 8px;margin:2px 0 4px;color:#ffd23f}
+.invpop .multibar button{margin:0}.invpop .multibar button[disabled]{opacity:.5}

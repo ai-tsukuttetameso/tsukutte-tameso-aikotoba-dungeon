@@ -11,9 +11,15 @@ const slotCost = o => Math.max(10, Math.round((jobHas('forge') ? 250 : 500) * ((
 const identCost = () => Math.max(10, Math.round(50 * G.shopRate / 10) * 10);
 const purifyCost = () => Math.max(10, Math.round(100 * G.shopRate / 10) * 10);
 let shopTab = 'buy', sellMode = 'inv';
+// まとめて うる：sellMulti＝えらぶ モード、sellPick＝えらんだ 物（もちものの 物そのもの）
+let sellMulti = false, sellPick = new Set();
+const pickedList = () => P.inv.filter(o => sellPick.has(o) && !o.unpaid && !(o.eq && o.cursed));
+const pickedSum = () => pickedList().reduce((s, o) => s + sellPrice(o) + bagSum(o), 0);
 const bagSum = o => o.items ? o.items.reduce((s, x) => s + sellPrice(x), 0) : 0;
-function openShop() { fuseObj = null; shopTab = 'buy'; invpop.hidden = false; sfx('shop'); drawShop(); say('AIかじや「いらっしゃいませ。本日のAI価格です。」'); render(); }
+function openShop() { fuseObj = null; shopTab = 'buy'; sellMulti = false; sellPick.clear(); shopLastTab = ''; invpop.hidden = false; sfx('shop'); drawShop(); say('AIかじや「いらっしゃいませ。本日のAI価格です。」'); render(); }
+let shopLastTab = '';
 function drawShop(msg) {
+  if (invpop.dataset.mode !== 'shop') shopLastTab = '';
   invpop.dataset.mode = 'shop';
   const rate = G.shopRate, tag = rate < 1 ? '<b style="color:#7cf0a0">おとく</b>' : rate > 1 ? '<b style="color:#ff6b6b">たかい</b>' : 'ふつう';
   const eqs = P.inv.map((o, i) => [o, i]).filter(([o]) => ITEMS[o.k].equip && isKnown(o.k));
@@ -29,18 +35,21 @@ function drawShop(msg) {
   if (shopTab === 'sell') { const list = P.inv.map((o, i) => [o, i]).filter(([o]) => !o.unpaid && !(o.eq && o.cursed));
     body = `<div class="help" style="margin-top:4px">うると、ねだんの 半分くらいで 買いとってもらえます（AI価格で かわります）</div>`
       + `<div class="tabs sub"><button data-sellmode="inv"${sellMode === 'inv' ? ' class="on"' : ''}>もちものを うる</button><button data-sellmode="bag"${sellMode === 'bag' ? ' class="on"' : ''}>袋の中身を うる</button></div>`;
-    if (sellMode === 'inv') body += list.length ? list.map(([o, i]) => `<button data-sell="${i}">${o.eq ? '[E] ' : ''}${nameHtml(o)}<br><small style="color:#a79fb8">${sellPrice(o) + bagSum(o)}Gで うる${o.items && o.items.length ? `・袋ごと（中身 ${o.items.length}こも いっしょ）` : ''}</small></button>`).join('') : '<span class="help">うれる物が ない</span>';
+    if (sellMode === 'inv') body += `<div class="multirow"><button data-multi="1"${sellMulti ? ' class="on"' : ''}>${sellMulti ? '✓ まとめて えらぶ（タップで えらぶ）' : 'まとめて えらんで うる'}</button>${sellMulti ? '<button data-pickall="1">ぜんぶ えらぶ</button><button data-pickclear="1">えらびなおす</button>' : ''}</div>`
+      + (list.length ? list.map(([o, i]) => `<button ${sellMulti ? `data-pick="${i}" class="pick${sellPick.has(o) ? ' on' : ''}"` : `data-sell="${i}"`}>${sellMulti ? `<span class="ck">${sellPick.has(o) ? '■' : '□'}</span> ` : ''}${o.eq ? '[E] ' : ''}${nameHtml(o)}<br><small style="color:#a79fb8">${sellPrice(o) + bagSum(o)}G${sellMulti ? '' : 'で うる'}${o.items && o.items.length ? `・袋ごと（中身 ${o.items.length}こも いっしょ）` : ''}</small></button>`).join('') : '<span class="help">うれる物が ない</span>');
     else { const bags = myBags(), all = bags.reduce((s, bg) => s + bagSum(bg), 0), n = bags.reduce((s, bg) => s + bg.items.length, 0);
       body += n ? `<button data-sellall="1" class="eq">袋の中身を ぜんぶ うる（${n}こ・${all}G）<br><small style="color:#a79fb8">袋は のこります</small></button>` + bags.map(bg => { const bi = P.inv.indexOf(bg);
         return bg.items.length ? `<div class="bagbox"><div class="baghd">${nameHtml(bg)}</div>` + bg.items.map((x, j) => `<button data-sellb="${bi}:${j}">${nameHtml(x)}<br><small style="color:#a79fb8">${sellPrice(x)}Gで うる</small></button>`).join('') + '</div>' : ''; }).join('')
         : '<span class="help">袋の中に うれる物が ない</span>'; } }
   if (shopTab === 'ident') body = `<div class="help" style="margin-top:4px">正体の わからない物を みてもらう（1こ ${identCost()}G）</div>` + (unk.length ? unk.map(([o, i]) => `<button data-ident="${i}">${nameHtml(o)}</button>`).join('') : '<span class="help">わからない物は ない</span>');
   if (shopTab === 'purify') body = `<div class="help" style="margin-top:6px">そうびの のろいを とく</div><button data-purify="1">おはらい ${purifyCost()}G</button>`;
-  invpop.innerHTML = `<div><b style="color:#ffd23f">AIかじや</b>　本日のAI価格 ×${rate}（${tag}）　所持 <b style="color:#ffd23f">${P.gold}</b>G</div>`
+  // 上の 見出し（お知らせ・お金・おかいけい・タブ）は スクロールしても 上に のこす
+  const keepScroll = !invpop.hidden && shopLastTab === shopTab && shopTab !== 'fuse', top = invpop.scrollTop;
+  invpop.innerHTML = `<div class="pophead">${msg ? `<div class="shopmsg">${msg}</div>` : ''}<div><b style="color:#ffd23f">AIかじや</b>　本日のAI価格 ×${rate}（${tag}）　所持 <b style="color:#ffd23f">${P.gold}</b>G</div>`
     + (unpaid.length ? `<div class="pay"><div class="help">おかいけい（まだ はらっていない物）</div>${unpaid.map(o => `<div class="payrow">${nameHtml(o)}　<b style="color:#ffd23f">${o.unpaid}G</b> <button data-return="${P.inv.indexOf(o)}">かえす</button></div>`).join('')}<button data-pay="1" class="eq">${total}G はらう</button></div>` : '')
-    + `<div class="tabs">${tabs.map(([k, l]) => `<button data-tab="${k}"${k === shopTab ? ' class="on"' : ''}>${l}</button>`).join('')}<button data-close="1">みせを でる</button></div>` + body;
-  if (msg) invpop.innerHTML = `<div class="shopmsg">${msg}</div>` + invpop.innerHTML;
-  invpop.scrollTop = 0;
+    + `<div class="tabs">${tabs.map(([k, l]) => `<button data-tab="${k}"${k === shopTab ? ' class="on"' : ''}>${l}</button>`).join('')}<button data-close="1">みせを でる</button></div>${shopTab === 'sell' && sellMode === 'inv' && sellMulti ? `<div class="multibar">えらんだ ${pickedList().length}こ・${pickedSum()}G <button data-sellpicked="1" class="eq"${pickedList().length ? '' : ' disabled'}>まとめて うる</button></div>` : ''}</div>` + body;
+  // 同じ タブで 買ったり 売ったり したときは、スクロールの 位置を そのままに
+  invpop.scrollTop = keepScroll ? top : 0; shopLastTab = shopTab;
 }
 // 合成：数値は 足し算＋1、わくは 多いほう、特性は わくの 数まで
 const fusedTraits = (a, b) => [...new Set([...(a.traits || []), ...(b.traits || [])])].slice(0, traitCap({ tslot: Math.max(a.tslot || 0, b.tslot || 0) }));
@@ -87,6 +96,13 @@ function shopClick(b) {
   if (b.dataset.return !== undefined) { const o = P.inv[+b.dataset.return]; if (!o || !o.unpaid) return drawShop(); const p = shopSpot(); if (!p) return drawShop('おく場所が ない。');
     P.inv.splice(P.inv.indexOf(o), 1); G.items.push({ ...p, k: o.k, o, price: o.unpaid }); delete o.unpaid; say(`${itemName(o)}を お店に かえした。`); return drawShop(`${itemName(o)}を かえしました。お店の ゆかに もどしておきます。`); }
   if (b.dataset.sellmode) { sellMode = b.dataset.sellmode; return drawShop(); }
+  if (b.dataset.multi) { sellMulti = !sellMulti; sellPick.clear(); return drawShop(); }
+  if (b.dataset.pick !== undefined) { const o = P.inv[+b.dataset.pick]; if (o) sellPick.has(o) ? sellPick.delete(o) : sellPick.add(o); return drawShop(); }
+  if (b.dataset.pickall) { for (const o of P.inv) if (!o.unpaid && !(o.eq && o.cursed)) sellPick.add(o); return drawShop(); }
+  if (b.dataset.pickclear) { sellPick.clear(); return drawShop(); }
+  if (b.dataset.sellpicked) { const list = pickedList(); if (!list.length) return drawShop('うる物を えらんでください。'); let c = 0;
+    for (const o of list) { c += sellPrice(o) + bagSum(o); P.inv.splice(P.inv.indexOf(o), 1); } P.gold += c; sellPick.clear(); sfx('sell');
+    say(`${list.length}こを まとめて ${c}Gで うった。`); drawShop(`${list.length}こを まとめて ${c}Gで うった。（${list.map(itemName).join('・')}）`); render(); return; }
   if (b.dataset.sellall) { let c = 0, n = 0; for (const bg of myBags()) { c += bagSum(bg); n += bg.items.length; bg.items = []; }
     P.gold += c; sfx('sell'); say(`袋の 中身 ${n}こを ${c}Gで うった。`); return drawShop(`袋の 中身 ${n}こを ${c}Gで うった。袋は のこっています。`); }
   if (b.dataset.sellb) { const [bi, j] = b.dataset.sellb.split(':').map(Number); const bg = P.inv[bi], x = bg && bg.items[j]; if (!x) return drawShop(); const c = sellPrice(x);

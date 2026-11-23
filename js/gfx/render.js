@@ -56,6 +56,9 @@ function render() {
   if (G.seen[G.stairs.y][G.stairs.x] && inView(G.stairs.x, G.stairs.y)) { const [X, Y] = at(G.stairs.x, G.stairs.y); dI(S.stairs, X, Y + 2); }
   if (G.npc && G.seen[G.npc.y][G.npc.x] && inView(G.npc.x, G.npc.y)) { const [X, Y] = at(G.npc.x, G.npc.y); g.fillStyle = 'rgba(0,0,0,.35)'; g.beginPath(); g.ellipse(X + 8, Y + 14, 6, 2.5, 0, 0, 7); g.fill(); dI(S[FRIENDS[G.npc.who].spr], X - 1, Y - 2 + Math.round(Math.abs(Math.sin(tt * 3)) * -1)); }
   if (G.shop && G.seen[G.shop.y][G.shop.x] && inView(G.shop.x, G.shop.y)) { const [X, Y] = at(G.shop.x, G.shop.y); g.fillStyle = 'rgba(0,0,0,.35)'; g.beginPath(); g.ellipse(X + 8, Y + 14, 6, 2.5, 0, 0, 7); g.fill(); dI(S.clerk, X - 1, Y - 2 + Math.round(Math.sin(tt * 3))); }
+  if (G.portal && inView(G.portal.x, G.portal.y)) { const [X, Y] = at(G.portal.x, G.portal.y), ph = performance.now() / 300; g.save(); g.globalAlpha = .55 + .25 * Math.sin(ph);
+    g.fillStyle = '#7a3cff'; g.beginPath(); g.ellipse(X + 8, Y + 9, 7, 4.5, 0, 0, 7); g.fill(); g.strokeStyle = '#e2c8ff'; g.lineWidth = 1; g.beginPath(); g.ellipse(X + 8, Y + 9, 5 + Math.sin(ph) * 1.2, 3, 0, 0, 7); g.stroke();
+    g.globalAlpha = 1; g.fillStyle = '#fff'; g.fillRect(X + 7, Y + 2 + Math.round(Math.sin(ph * 2) * 1.5), 2, 2); g.restore(); }
   for (const t of G.traps) if (t.found && inView(t.x, t.y)) { const [X, Y] = at(t.x, t.y); dI(S[TRAPS[t.k].spr], X, Y + 4); }
   const tags = [];
   for (const it of G.items) if (visible(it.x, it.y) && inView(it.x, it.y)) { const [X, Y] = at(it.x, it.y); dI(S[it.k === 'gold' ? 'gold' : ITEMS[it.k].spr], X - 1, Y + 2 + Math.round(Math.sin(tt * 3 + it.x) * .6)); if (it.price) tags.push(`<span class="tag" style="left:${(X + 8) / LW * 100}%;top:${(Y + 17) / LH * 100}%" title="お店の うりもの（はらわずに 出ると 店主が おこる）"><b>売</b>${it.price}G</span>`); }

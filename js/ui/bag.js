@@ -3,14 +3,26 @@
 
 // ===== しまう袋 =====
 let bagObj = null;
-function openBag(o) { bagObj = o; invpop.hidden = false; drawBag(); }
+// 袋の 中の 物を すてる（その場で 消える。ターンは すすまない）。1回目で たしかめ、2回目で すてる
+let tossAsk = '';
+const tossBtn = (key, x) => `<button class="s toss${tossAsk === key ? ' ask' : ''}" data-toss="${key}">${tossAsk === key ? 'ほんとに すてる？' : 'すてる'}</button>`;
+// 袋の 中の 物を 足もとに おく（もちものと 同じく 1ターン つかう）。おけないときは 理由を かえす
+function placeFromBag(bag, j, redraw) { const x = bag.items[j]; if (!x) return '';
+  if (G.items.some(it => it.x === P.x && it.y === P.y) || (P.x === G.stairs.x && P.y === G.stairs.y)) return 'ここには おけない。（足もとに もう 物が あるか、階段の 上）';
+  bag.items.splice(j, 1); tossAsk = ''; G.items.push({ x: P.x, y: P.y, k: x.k, o: x }); say(`${itemName(x)}を 袋から 出して 足もとに おいた。`);
+  invpop.hidden = true; endTurn(); reopenAfterUse(redraw, bag); render(); return null; }
+function tossFromBag(bag, j) { const x = bag.items[j]; if (!x) return ''; bag.items.splice(j, 1); tossAsk = ''; sfx('use'); say(`${itemName(x)}を すてた。`); render(); return `${itemName(x)}を すてた。`; }
+function openBag(o) { bagObj = o; tossAsk = ''; invpop.hidden = false; drawBag(); }
 function drawBag(msg) { const o = bagObj; invpop.dataset.mode = 'bag';
   const can = P.inv.map((x, i) => [x, i]).filter(([x]) => x !== o && !ITEMS[x.k].bag && !x.eq && !x.unpaid);
   invpop.innerHTML = (msg ? `<div class="shopmsg">${msg}</div>` : '') + `<div><b style="color:#ffd23f">${itemName(o)}</b>　<button data-close="1">とじる</button></div>`
-    + `<div class="help">中に 入っている物（名前で とりだす・「使う」で その場で 使う）${o.items.length ? ' <button data-outall="1">ぜんぶ 出す</button>' : ''}</div>` + (o.items.length ? o.items.map((x, j) => `<span class="it"><button data-out="${j}">${nameHtml(x)}</button>${ITEMS[x.k].equip ? '' : `<button class="s" data-use="${j}">使う</button>`}</span>`).join('') : '<span class="help">からっぽ</span>')
+    + `<div class="help">中に 入っている物（名前で とりだす・「使う」で その場で 使う）${o.items.length ? ' <button data-outall="1">ぜんぶ 出す</button>' : ''}</div>` + (o.items.length ? o.items.map((x, j) => `<span class="it"><button data-out="${j}">${nameHtml(x)}</button>${ITEMS[x.k].equip ? '' : `<button class="s" data-use="${j}">使う</button>`}<button class="s" data-put="${j}">おく</button>${tossBtn('b:' + j, x)}</span>`).join('') : '<span class="help">からっぽ</span>')
     + `<div class="help" style="margin-top:6px">もちものから しまう（あと ${o.cap - o.items.length}こ）${can.length && o.items.length < o.cap ? ' <button data-inall="1">入るだけ しまう</button>' : ''}</div>` + (can.length ? can.map(([x, i]) => `<button data-in="${i}">${nameHtml(x)}</button>`).join('') : '<span class="help">しまえる物が ない（そうび中の物は しまえない）</span>');
   invpop.scrollTop = 0; }
 function bagClick(b) { const o = bagObj;
+  if (b.dataset.toss) { const k = b.dataset.toss; if (tossAsk !== k) { tossAsk = k; return drawBag(); } return drawBag(tossFromBag(o, +k.split(':')[1])); }
+  tossAsk = '';
+  if (b.dataset.put !== undefined) { const m = placeFromBag(o, +b.dataset.put, () => { bagObj = o; drawBag(); }); if (m) drawBag(m); return; }
   if (b.dataset.use !== undefined) { const x = o.items[+b.dataset.use]; if (!x) return drawBag(); invpop.hidden = true; useObj(x, o.items); reopenAfterUse(() => { bagObj = o; drawBag(); }, o); return; }
   if (b.dataset.outall) { let n = 0; while (o.items.length && !invFull()) { P.inv.push(o.items.shift()); n++; } say(`袋から ${n}こ とりだした。`); drawBag(o.items.length ? 'もちものが いっぱいで、ぜんぶは 出せなかった。' : ''); render(); return; }
   if (b.dataset.inall) { let n = 0; for (const x of [...P.inv]) { if (o.items.length >= o.cap) break; if (x === o || ITEMS[x.k].bag || x.eq || x.unpaid) continue; P.inv.splice(P.inv.indexOf(x), 1); o.items.push(x); n++; } say(`袋に ${n}こ しまった。`); drawBag(); render(); return; }
@@ -26,16 +38,19 @@ const stashable = () => P.inv.filter(x => !ITEMS[x.k].bag && !x.eq && !x.unpaid)
 function stashAll() { let n = 0;
   for (const x of stashable()) { const b = bagWithRoom(); if (!b) break; P.inv.splice(P.inv.indexOf(x), 1); b.items.push(x); n++; }
   say(n ? `袋に ${n}こ しまった。` : (myBags().length ? '袋に しまえる物が ない（または 袋が いっぱい）。' : 'しまう袋を もっていない。')); return n; }
-function openBags() { invpop.hidden = false; drawBags(); }
+function openBags() { tossAsk = ''; invpop.hidden = false; drawBags(); }
 function drawBags(msg) { invpop.dataset.mode = 'bags'; const bags = myBags();
   const room = bags.reduce((s, b) => s + b.cap - b.items.length, 0);
   invpop.innerHTML = (msg ? `<div class="shopmsg">${msg}</div>` : '') + `<div><b style="color:#ffd23f">袋の中身 一覧</b>（${bags.length}こ・空き ${room}）　<button data-close="1">とじる</button></div>`
     + `<div class="help">もちものの ${stashable().length}こを しまえます。<button data-stash="1"${stashable().length && room ? '' : ' disabled'}>ぜんぶの袋に 入るだけ しまう</button></div>`
     + (bags.length ? bags.map(b => { const bi = P.inv.indexOf(b);
-      return `<div class="bagbox"><div class="baghd">${nameHtml(b)}</div>` + (b.items.length ? b.items.map((x, j) => `<div class="row1"><button data-bu="${bi}:${j}" title="${ITEMS[x.k].equip ? '' : '使う'}">${nameHtml(x)}<br><small style="color:#a79fb8">${ITEMS[x.k].equip ? 'そうびは 出してから 付ける・' : 'タップで 使う・'}${itemDesc(x)}</small></button><button class="s" data-bo="${bi}:${j}">出す</button></div>`).join('') : '<span class="help">からっぽ</span>') + '</div>'; }).join('')
+      return `<div class="bagbox"><div class="baghd">${nameHtml(b)}</div>` + (b.items.length ? b.items.map((x, j) => `<div class="row1"><button data-bu="${bi}:${j}" title="${ITEMS[x.k].equip ? '' : '使う'}">${nameHtml(x)}<br><small style="color:#a79fb8">${ITEMS[x.k].equip ? 'そうびは 出してから 付ける・' : 'タップで 使う・'}${itemDesc(x)}</small></button><button class="s" data-bo="${bi}:${j}">出す</button><button class="s" data-bp="${bi}:${j}">おく</button>${tossBtn(bi + ':' + j, x)}</div>`).join('') : '<span class="help">からっぽ</span>') + '</div>'; }).join('')
       : '<span class="help">しまう袋を もっていない</span>');
 }
 function bagsClick(b) {
+  if (b.dataset.toss) { const k = b.dataset.toss; if (tossAsk !== k) { tossAsk = k; return drawBags(); } const [bi, j] = k.split(':').map(Number); const bag = P.inv[bi]; return drawBags(bag && bag.items ? tossFromBag(bag, j) : ''); }
+  tossAsk = '';
+  if (b.dataset.bp) { const [bi, j] = b.dataset.bp.split(':').map(Number); const bag = P.inv[bi]; if (!bag || !bag.items) return drawBags(); const m = placeFromBag(bag, j, drawBags); if (m) drawBags(m); return; }
   if (b.dataset.stash) { const n = stashAll(); render(); return drawBags(n ? `${n}こ しまいました。` : ''); }
   const ref = b.dataset.bu || b.dataset.bo; if (!ref) return; const [bi, j] = ref.split(':').map(Number); const bag = P.inv[bi]; const x = bag && bag.items[j]; if (!x) return drawBags();
   if (b.dataset.bo) { if (invFull()) return drawBags('もちものが いっぱいで 出せない。'); bag.items.splice(j, 1); P.inv.push(x); say(`${itemName(x)}を 袋から 出した。`); render(); return drawBags(); }

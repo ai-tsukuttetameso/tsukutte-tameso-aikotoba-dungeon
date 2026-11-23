@@ -66,10 +66,13 @@ function step() {
       else { const nm = it.o ? itemName(it.o) : (isKnown(it.k) ? ITEMS[it.k].name : FAKE[it.k]); say(`${nm}${it.price ? `（${it.price}G）` : ''}が おちている。でも もちものが いっぱいで ひろえない。（${invCount()}/${INV_MAX}）`); }
     }
   }
+  // もどりの まほうじん：ふりだしのわなで もどされた 階へ もどる
+  if (G.portal && P.x === G.portal.x && P.y === G.portal.y) { const to = G.portal.to; P.backF = 0; stairsSound(); enterFloor(to); shake(6); say(`もどりの まほうじんで 地下${to}階に もどってきた！`); showBanner(`地下${to}階に もどった！`, 'もどりの まほうじん'); return; }
   const tr = G.traps.find(o => o.x === P.x && o.y === P.y);
   if (tr) { tr.found = true; if (jobHas('trapper')) say(`${TRAPS[tr.k].name}を かんたんに はずした。（からくりし）`); else if (eqPerk('light') && rnd() < .5) say(`${TRAPS[tr.k].name}を ふみそうに なったが、はやてのくつで とびこえた！`); else trap(tr.k); }
   if (G.stairs && P.x === G.stairs.x && P.y === G.stairs.y) say('階段が ある。（Enter か「階段をおりる」で おりる）');
 }
+const furiMax = () => LAST > 10 ? 2 : 1;
 function trap(k) {
   const n = TRAPS[k].name; sfx('trap');
   if (k === 'spike' && hasTrait('togeyoke')) { say(`${n}を ふんだが、トゲよけで なんともない。`); return; }
@@ -80,7 +83,11 @@ function trap(k) {
   if (k === 'nisa') { const g = Math.floor(P.gold / 2); P.gold -= g; say(`${n}だ！ つみたてに 回しすぎて、${g}ゴールド 消えた。`); }
   if (k === 'cat' && hasTrait('nekoyoke')) { say(`${n}を ふんだが、ねこよけで おどらずにすんだ。`); return; }
   if (k === 'cat') { P.skip = 2; P.skipMsg = ''; say(`${n}を ふんだ！ 体が かってに おどりだした。（2ターン）`); }
-  if (k === 'start') { say(`${n}！！ 1階に もどされた……。`); shake(10); enterFloor(1); }
+  // ふりだしのわな：1回の 冒険で 1回まで（地下20階より 深い ダンジョンは 2回まで）。そのあとは こわれていて 何も おきない
+  if (k === 'start') { const max = furiMax();
+    if ((P.furi || 0) >= max) { say(`${n}を ふんだ！ ……けれど もう こわれていて、なにも おきなかった。`); return; }
+    P.furi = (P.furi || 0) + 1; P.backF = G.f; say(`${n}！！ 1階に もどされた……。（のこり ${max - P.furi}回）`); shake(10); enterFloor(1);
+    say(`そばに「もどりの まほうじん」が ある。乗ると 地下${P.backF}階に もどれる。`); showBanner('ふりだしに もどされた！', `そばの まほうじんで 地下${P.backF}階に もどれる`); }
 }
 function useItem(i) { const o = P.inv[i]; if (o) useObj(o, P.inv); }
 // o を 使う。list は o が 入っている場所（もちもの か 袋の中身）。袋の中の そうびは 使えない
