@@ -452,3 +452,15 @@ small.rule.ura{background:#5a1f7a;border-color:#b34dff;color:#f0d0ff}
 .over .sndbox button.moviebtn{cursor:pointer}.over .sndbox button.moviebtn:hover{border-color:#ffd23f}
 .over .sndbox .moviebtn b{color:#ffd23f;font-weight:400;font-size:16px}.over .sndbox .moviebtn small{color:#a79fb8;font-size:12px}
 .over .sndbox .moviebtn.lock b{color:#a79fb8}
+
+/* 合成で のこす 特性を えらぶ */
+.fuse button[data-ftr]{display:block;width:100%;text-align:left}
+
+/* 特性の 小窓 */
+.trpop{position:fixed;inset:0;z-index:200;background:#000a;display:flex;align-items:center;justify-content:center;padding:16px}
+.trpop .trcard{background:#1a1430;border:2px solid #ffd23f;border-radius:10px;padding:12px;width:min(420px,100%);max-height:80dvh;overflow:auto;display:grid;gap:6px;color:#f2ecff}
+.trpop .trhd{display:flex;justify-content:space-between;align-items:center;gap:8px}.trpop .trhd b{color:#ffd23f;font-weight:400}
+.trpop .trsub{font-size:12px;color:#a79fb8}
+.trpop .trrow{display:flex;flex-direction:column;gap:2px;background:#0008;border:1px solid #4d4080;border-radius:6px;padding:6px 8px}
+.trpop .trrow b{color:#7cf0a0;font-weight:400}.trpop .trrow small{color:#cfc6e6;font-size:12px}
+.trpop .trrow.empty{border-style:dashed}.trpop .trrow.empty small{color:#7d7499}.trpop .trrow.cur small{color:#ff9a9a}

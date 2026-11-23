@@ -21,7 +21,7 @@ const pickedNow = () => sellMode === 'bag' ? pickedBag() : pickedList();
 const pickedNowSum = () => sellMode === 'bag' ? pickedBag().reduce((s, x) => s + sellPrice(x), 0) : pickedSum();
 const multiRow = () => `<div class="multirow"><button data-multi="1"${sellMulti ? ' class="on"' : ''}>${sellMulti ? '✓ まとめて えらぶ（タップで えらぶ）' : 'まとめて えらんで うる'}</button>${sellMulti ? '<button data-pickall="1">ぜんぶ えらぶ</button><button data-pickclear="1">えらびなおす</button>' : ''}</div>`;
 const bagSum = o => o.items ? o.items.reduce((s, x) => s + sellPrice(x), 0) : 0;
-function openShop() { fuseObj = null; shopTab = 'buy'; sellMulti = false; sellPick.clear(); shopLastTab = ''; invpop.hidden = false; sfx('shop'); drawShop(); say('AIかじや「いらっしゃいませ。本日のAI価格です。」'); render(); }
+function openShop() { fuseObj = null; fusePick = null; shopTab = 'buy'; sellMulti = false; sellPick.clear(); shopLastTab = ''; invpop.hidden = false; sfx('shop'); drawShop(); say('AIかじや「いらっしゃいませ。本日のAI価格です。」'); render(); }
 let shopLastTab = '';
 function drawShop(msg) {
   if (invpop.dataset.mode !== 'shop') shopLastTab = '';
@@ -69,6 +69,16 @@ function fuseList() { const out = P.inv.filter(o => ITEMS[o.k].equip && isKnown(
   return out.map((e, i) => [e, i]).sort((a, b) => rank(a[0]) - rank(b[0]) || a[1] - b[1]).map(([e]) => e); }
 let fuseObj = null;  // ① で えらんだ もとの 装備
 const fuseLabel = e => `${e.o.eq ? '[E] ' : ''}${e.bag ? '<small style="color:#7ad8ff">［袋］</small>' : ''}${nameHtml(e.o)}`;
+// 特性が わくに 入りきらない ときは、のこす 特性を えらぶ（fusePick＝{ b: まぜる装備, sel: のこす特性 }）
+let fusePick = null;
+const fuseAll = (a, b) => [...new Set([...(a.traits || []), ...(b.traits || [])])];
+const fuseCap = (a, b) => traitCap({ tslot: Math.max(a.tslot || 0, b.tslot || 0) });
+function fusePickHtml(a, b) { const all = fuseAll(a, b), cap = fuseCap(a, b), sel = fusePick.sel, c = fuseCost(a, b);
+  return `<div class="fuse"><div class="help">もと：<b style="color:#ffd23f">${itemName(a)}</b> ＋ まぜる：<b style="color:#ffd23f">${itemName(b)}</b></div>`
+    + `<div class="help" style="color:#ff9a5c">③ 特性が ${all.length}こ あって、わく（${cap}）に 入りきりません。のこす 特性を ${cap}こまで えらんでください。えらばなかった 特性は なくなります</div>`
+    + `<div class="multibar">えらんだ ${sel.size}/${cap}　<button data-fusego="1" class="eq">この 特性で 合成する（${c}G）</button></div>`
+    + all.map(t => `<button data-ftr="${t}" class="pick${sel.has(t) ? ' on' : ''}"><span class="ck">${sel.has(t) ? '■' : '□'}</span> <b>${TRAITS[t].name}</b>${(a.traits || []).includes(t) ? '' : ' <small class="newtr">（まぜる 装備から）</small>'}<br><small style="color:#a79fb8">${TRAITS[t].desc}</small></button>`).join('')
+    + `<button data-fuseback="1">② に もどる</button></div>`; }
 function fuseHtml() {
   const eqs = fuseList();
   const nOf = slot => eqs.filter(e => ITEMS[e.o.k].equip === slot).length;
@@ -78,9 +88,10 @@ function fuseHtml() {
   if (!ae) { fuseObj = null;
     return h + `<div class="help">① もとにする装備を えらんでください（いま そうびしている 物が 上に ならびます）</div>` + eqs.map((e, i) => [e, i]).filter(([e]) => nOf(ITEMS[e.o.k].equip) >= 2).map(([e, i]) => `<button data-fuse="${i}">${fuseLabel(e)}<br><small style="color:#a79fb8">${itemDesc(e.o)}</small></button>`).join('') + '</div>'; }
   const a = ae.o;
+  if (fusePick && eqs.some(e => e.o === fusePick.b)) return fusePickHtml(a, fusePick.b); fusePick = null;
   h += `<div class="help">もと：<b style="color:#ffd23f">${itemName(a)}</b>（${itemDesc(a)}）</div><div class="help">② まぜる装備を えらんでください（まぜた方は なくなります）。<b class="newtr">緑の 特性</b>は もとの 装備に ない 特性です</div>`;
   h += eqs.map((e, i) => [e, i]).filter(([e]) => e.o !== a && ITEMS[e.o.k].equip === ITEMS[a.k].equip).map(([e, i]) => { const o = e.o, r = fusedPreview(a, o), c = fuseCost(a, o), ok = P.gold >= c && !o.unpaid && !a.unpaid;
-    return `<button data-fuse="${i}"${ok ? '' : ' class="ng"'}>${fuseLabel(e)} をまぜる<br><small style="color:#a79fb8">→ ${itemName(r)}（${descHi(r, t => !(a.traits || []).includes(t), 'もとの 装備に ない 特性')}）　${c}G${P.gold < c ? '・ゴールドが たりない' : ''}${o.unpaid || a.unpaid ? '・先に お金を はらってね' : ''}</small></button>`; }).join('');
+    return `<button data-fuse="${i}"${ok ? '' : ' class="ng"'}>${fuseLabel(e)} をまぜる<br><small style="color:#a79fb8">→ ${itemName(r)}（${descHi(r, t => !(a.traits || []).includes(t), 'もとの 装備に ない 特性')}）　${c}G${P.gold < c ? '・ゴールドが たりない' : ''}${o.unpaid || a.unpaid ? '・先に お金を はらってね' : ''}${fuseAll(a, o).length > fuseCap(a, o) ? `<br><b style="color:#ff9a5c">特性が ${fuseAll(a, o).length}こ（わく ${fuseCap(a, o)}）。のこす 特性を えらべます</b>` : ''}</small></button>`; }).join('');
   return h + `<button data-fusecancel="1">えらびなおす</button></div>`;
 }
 // わくを ふやす：装備を 1つ えらんで、特性の わくを ＋1（もちもの・袋の 中・そうび中 どれでも）
@@ -126,7 +137,7 @@ function shopClick(b) {
     bg.items.splice(j, 1); P.gold += c; sfx('sell'); say(`${itemName(x)}を ${c}Gで うった。`); return drawShop(`${itemName(x)}を ${c}Gで うった。`); }
   if (b.dataset.sell !== undefined) { const o = P.inv[+b.dataset.sell]; if (!o) return drawShop(); const c = sellPrice(o) + bagSum(o);
     P.inv.splice(P.inv.indexOf(o), 1); P.gold += c; sfx('sell'); say(`${itemName(o)}を ${c}Gで うった。`); return drawShop(`${itemName(o)}を ${c}Gで うった。`); }
-  if (b.dataset.tab) { shopTab = b.dataset.tab; fuseObj = null; return drawShop(); }
+  if (b.dataset.tab) { shopTab = b.dataset.tab; fuseObj = null; fusePick = null; return drawShop(); }
   if (b.dataset.slot !== undefined) { const e = fuseList()[+b.dataset.slot]; if (!e) return drawShop(); const o = e.o, c = slotCost(o);
     if (traitCap(o) >= TRAIT_SLOT_MAX) return drawShop(`${itemName(o)}の わくは もう ${TRAIT_SLOT_MAX}つ。これ以上 ふやせない。`);
     if (o.unpaid) return drawShop('お金を はらってから たのんでください。'); if (P.gold < c) return drawShop(`${c}G ひつよう。ゴールドが たりない。（いま ${P.gold}G）`);
@@ -134,7 +145,7 @@ function shopClick(b) {
   if (b.dataset.evo) { const [i, k] = b.dataset.evo.split(':'), e = fuseList()[+i]; if (!e || !evoReady(e.o) || !evoChoices(e.o).includes(k)) return drawShop(); const c = evoCost();
     if (e.o.unpaid) return drawShop('お金を はらってから たのんでください。'); if (P.gold < c) return drawShop(`${c}G ひつよう。ゴールドが たりない。（いま ${P.gold}G）`);
     P.gold -= c; sfx('forge'); shake(4); const m = evolveItem(e.o, k); say(m); if (!fuseList().some(x => evoReady(x.o))) shopTab = 'buy'; drawShop(`${m}（${c}G）`); render(); return; }
-  if (b.dataset.fusecancel) { fuseObj = null; return drawShop(); }
+  if (b.dataset.fusecancel) { fuseObj = null; fusePick = null; return drawShop(); }
   if (b.dataset.pay) { const unpaid = P.inv.filter(o => o.unpaid), total = unpaid.reduce((s, o) => s + o.unpaid, 0);
     if (P.gold < total) return drawShop('ゴールドが たりない。いらない物は ゆかに おいて もどせます。');
     P.gold -= total; for (const o of unpaid) delete o.unpaid; sfx('pay'); say(`${total}Gを はらった。まいど ありがとうございます。`); drawShop('おかいけい ありがとうございます。'); render(); return; }
@@ -148,15 +159,23 @@ function shopClick(b) {
     P.gold -= c; const o = s.inf ? newItem(k, 'shop') : s.o; if (!s.inf) G.stock.splice(G.stock.indexOf(s), 1); if (ITEMS[k].cat) P.known.add(k);
     if (bag) bag.items.push(o); else P.inv.push(o); sfx('buy');
     const where = bag ? `（もちものが いっぱいなので ${itemName(bag)}に 入れた）` : ''; say(`${itemName(o)}を ${c}Gで かった。${where}`); drawShop(`${itemName(o)}を かった。${where}`); render(); return; }
-  if (b.dataset.fuse !== undefined) { const eqs = fuseList(), e2 = eqs[+b.dataset.fuse]; if (!e2) return drawShop();
+  if (b.dataset.ftr) { if (!fusePick) return drawShop(); const t = b.dataset.ftr, a = fuseObj, cap = fuseCap(a, fusePick.b);
+    if (fusePick.sel.has(t)) fusePick.sel.delete(t); else if (fusePick.sel.size >= cap) return drawShop(`わくは ${cap}つまで。ほかの 特性を はずしてから えらんでください。`); else fusePick.sel.add(t); return drawShop(); }
+  if (b.dataset.fuseback) { fusePick = null; return drawShop(); }
+  let keep = null, fuseIdx = b.dataset.fuse;
+  if (b.dataset.fusego) { if (!fusePick) return drawShop(); keep = [...fusePick.sel]; fuseIdx = fuseList().findIndex(e => e.o === fusePick.b); if (fuseIdx < 0) { fusePick = null; return drawShop(); } }
+  if (fuseIdx !== undefined) { const eqs = fuseList(), e2 = eqs[+fuseIdx]; if (!e2) return drawShop();
     const ae = fuseObj && eqs.find(e => e.o === fuseObj); if (!ae) { fuseObj = e2.o; return drawShop(); }
     const a = ae.o, c2 = e2.o;
     if (ITEMS[a.k].equip !== ITEMS[c2.k].equip) return drawShop('同じ 部位の そうびしか まぜられない。');
     if (a.unpaid || c2.unpaid) return drawShop('お金を はらってから 合成してください。');
     const cost = fuseCost(a, c2); if (P.gold < cost) return drawShop(`合成には ${cost}G ひつよう。ゴールドが たりない。（いま ${P.gold}G）`);
-    P.gold -= cost; a.plus = (a.plus || 0) + (c2.plus || 0) + 1; a.traits = fusedTraits(a, c2); a.tslot = Math.max(a.tslot || 0, c2.tslot || 0) || undefined; a.cursed = a.cursed || c2.cursed; a.curseKnown = a.curseKnown || c2.curseKnown;
+    // あふれる ときは まず えらぶ 画面へ（はじめは もとの 装備の 特性から じゅんに えらんで おく）
+    if (!keep && fuseAll(a, c2).length > fuseCap(a, c2)) { fusePick = { b: c2, sel: new Set(fusedTraits(a, c2)) }; return drawShop(); }
+    fusePick = null; const lost = keep ? fuseAll(a, c2).filter(t => !keep.includes(t)) : [];
+    P.gold -= cost; a.plus = (a.plus || 0) + (c2.plus || 0) + 1; a.traits = keep ? fuseAll(a, c2).filter(t => keep.includes(t)) : fusedTraits(a, c2); a.tslot = Math.max(a.tslot || 0, c2.tslot || 0) || undefined; a.cursed = a.cursed || c2.cursed; a.curseKnown = a.curseKnown || c2.curseKnown;
     e2.list.splice(e2.list.indexOf(c2), 1);
     // まぜた方を そうびしていたら、できた 装備を そうびする（袋の 中に あったら もちものに 出す）
     if (c2.eq) { if (ae.bag) { ae.list.splice(ae.list.indexOf(a), 1); P.inv.push(a); } a.eq = true; tidyEq(); }
-    fuseObj = null; sfx('lvup'); say(`合成した！ ${itemName(a)}（${itemDesc(a)}）`); drawShop(`合成した！ ${itemName(a)} になった。（${cost}G）`); render(); }
+    fuseObj = null; sfx('lvup'); say(`合成した！ ${itemName(a)}（${itemDesc(a)}）`); if (lost.length) say(`のこさなかった 特性：${lost.map(t => TRAITS[t].name).join('・')}`); drawShop(`合成した！ ${itemName(a)} になった。（${cost}G）`); render(); }
 }

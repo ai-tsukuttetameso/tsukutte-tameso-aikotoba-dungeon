@@ -51,11 +51,12 @@ function drawHud() {
   setHtml('hud', (innerWidth < 640 ? hudS : hud).join(''));
   document.getElementById('log').innerHTML = logs.map(l => `<div>${l}</div>`).join('');
   const db = document.getElementById('downBtn'); if (db) db.disabled = !(P.x === G.stairs.x && P.y === G.stairs.y);
-  tidyEq(); const row = (o, i) => `<span class="it"><button data-i="${i}" title="${itemDesc(o)}"${o.eq ? ' class="eq"' : ''}>${o.eq ? '[E] ' : KEYLBL[i] + '. '}${nameHtml(o)}${ITEMS[o.k].equip ? `<small class="eqtag">${o.eq ? 'はずす' : 'そうび'}</small>` : ''}</button><button class="s" data-t="${i}" title="向いている方向に投げる">なげ</button><button class="s" data-d="${i}" title="足もとに おく">おく</button></span>`;
+  tidyEq(); const row = (o, i) => `<span class="it"><button data-i="${i}" title="${itemDesc(o)}"${o.eq ? ' class="eq"' : ''}>${o.eq ? '[E] ' : KEYLBL[i] + '. '}${nameHtml(o)}${ITEMS[o.k].equip ? `<small class="eqtag">${o.eq ? 'はずす' : 'そうび'}</small>` : ''}</button>${trBtn(o, i)}<button class="s" data-t="${i}" title="向いている方向に投げる">なげ</button><button class="s" data-d="${i}" title="足もとに おく">おく</button></span>`;
   const eqHead = P.inv.some(o => o.eq) ? `<div class="eqhd">そうびバッグ（もちものに 数えない）</div>` : '';
   setHtml('inv', P.inv.length ? P.inv.map((o, i) => (o.eq && (i === 0 || !P.inv[i - 1].eq) ? eqHead : '') + row(o, i)).join('') + `<span class="help"> （${invCount()}/${invMax()}）${loadOver() ? (loadFree() ? `<b style="color:#9ad0ff"> おもい（＋${loadOver()}）けど かるがる</b>` : `<b style="color:#ff9a5c"> おもい（＋${loadOver()}）：おなかが へりやすい</b>`) : ''}</span> <button class="s" data-sort="1">ならべかえ（R）</button>${myBags().length ? ' <button class="s" data-bags="1">袋の中身（B）</button> <button class="s" data-stash="1">袋に しまう</button>' : ''}` : '<span class="help">なにも もっていない</span>');
   drawSkillBar();
 }
 document.getElementById('inv').addEventListener('click', e => { const b = e.target.closest('button'); if (!b || !over.hidden) return;
+  if (b.dataset.tr !== undefined) { showTraitPop(P.inv[+b.dataset.tr]); return; }
   if (b.dataset.bags) { openBags(); return; } if (b.dataset.stash) { stashAll(); render(); return; }
   if (b.dataset.sort) sortInv(); else if (b.dataset.t !== undefined) throwItem(+b.dataset.t); else if (b.dataset.d !== undefined) dropItem(+b.dataset.d); else useItem(+b.dataset.i); });
