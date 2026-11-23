@@ -2,7 +2,7 @@
 // デモの あいだは 記録・コレクション・セーブに 何も 書きこまない
 'use strict';
 
-const ATTRACT_IDLE = 25000;   // タイトルで 何も しない 時間（ミリ秒）
+const ATTRACT_IDLE = 50000;   // タイトルで 何も しない 時間（ミリ秒）
 const DEMO_LEN = 45000;       // デモプレイの 長さ
 const DEMO_PW = 'つくってためそ でも';
 const STORY_LINES = ['合言葉を となえると、ひとつの ダンジョンが 生まれる。', 'その いちばん 下では、でかこわの王が まちかまえている。', 'さあ、きみだけの 合言葉で 冒険に 出よう。'];
@@ -70,4 +70,6 @@ const _showOver = showOver; showOver = function (kind) { if (attract === 'demo' 
 // なにか おしたら やめる（その おした ことは ゲームに つたえない）
 function attractInput(ev) { noteInput(); if (!attract) return; ev.preventDefault(); ev.stopImmediatePropagation(); stopAttract(); }
 ['keydown', 'pointerdown', 'wheel', 'touchstart'].forEach(t => addEventListener(t, attractInput, { capture: true, passive: false }));
+addEventListener('pointermove', () => { if (!attract) noteInput(); }, { passive: true });  // 読んでいる あいだ（マウスを うごかしている あいだ）は デモに しない
+addEventListener('scroll', () => { if (!attract) noteInput(); }, { passive: true, capture: true });
 setInterval(() => { if (!attract && attractReady() && Date.now() - lastInput > ATTRACT_IDLE) showStory(); if (!attractReady() && !attract) noteInput(); }, 1000);

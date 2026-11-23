@@ -34,7 +34,7 @@ function fitView() {
 }
 addEventListener('resize', () => { fitView(); render(); }); fitView();
 // わざの 数や ログの 行が かわって 高さが かわったら、地図の 大きさを あわせなおす
-if (window.ResizeObserver) { let pend = 0; const ro = new ResizeObserver(() => { if (pend || twoCol()) return; pend = requestAnimationFrame(() => { pend = 0; fitView(); render(); }); });
+if (window.ResizeObserver) { let pend = 0; const ro = new ResizeObserver(() => { if (pend || innerWidth >= 900) return; pend = requestAnimationFrame(() => { pend = 0; fitView(); render(); }); });
   ['hud', 'log'].forEach(id => ro.observe(document.getElementById(id))); ro.observe(document.querySelector('.row')); }
 newGame('random', null, 10, 1, true); showOver('title'); render();
 setInterval(render, 100);

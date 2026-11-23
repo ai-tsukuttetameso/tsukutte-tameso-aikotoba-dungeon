@@ -26,6 +26,7 @@ function colMon(p) { const seen = p.seen || {}, kills = p.kills || {}, dex = new
     if (k >= MON_STEP[0]) b += `<small>HP ${m.hp}・こうげき ${m.atk}・まもり ${m.def}・けいけんち ${m.exp}</small>`;
     if (k >= MON_STEP[1]) { const fl = Object.keys(MON_FLAG).filter(f => m[f]).map(f => MON_FLAG[f]);
       b += `<small>${m.weak ? '弱点：' + ELEM[m.weak].name : '弱点：なし'}${m.resist ? '・ききにくい：' + ELEM[m.resist].name : ''}${fl.length ? '・' + fl.join('・') : ''}</small>`; }
+    else if ((p.weakKnown || {})[t] || (p.resistKnown || {})[t]) b += `<small>${(p.weakKnown || {})[t] ? '弱点：' + ELEM[m.weak].name : ''}${(p.weakKnown || {})[t] && (p.resistKnown || {})[t] ? '・' : ''}${(p.resistKnown || {})[t] ? 'ききにくい：' + ELEM[m.resist].name : ''}（ためして わかった）</small>`;
     if (k >= MON_STEP[2] && m.desc) b += `<small class="coldesc">${m.desc}</small>`;
     const nx = MON_STEP.find(s => k < s); if (nx) b += nextLine(`あと ${nx - k}体 たおすと くわしく わかる`);
     return colCard(colImg(m.spr), m.name, b); });
@@ -127,3 +128,13 @@ function showCollection(tab) { checkTitles(true); if (tab) colTab = tab; try { l
   for (const b of over.querySelectorAll('[data-title]')) b.onclick = () => { const id = b.dataset.title, cur = (() => { try { return localStorage.getItem('aikotoba_title'); } catch (e) { return ''; } })(); wearTitle(cur === id ? '' : id); sfx('pick'); showCollection(); };
   document.getElementById('colBack').onclick = () => { bgmPreview = null; showOver('title'); }; }
 try { colTab = localStorage.getItem('aikotoba_coltab') || 'mon'; } catch (e) {}
+
+// ===== ぼうけんの とちゅうで 図鑑（コレクション）を 見る（v1.69）=====
+// 見るだけ。ムービーは 冒険が おわって しまうので 出さない。「← ぼうけんに もどる」か Esc で もどる
+let colInGame = false;
+function openColInGame() { if (!G || G.over || !over.hidden || (typeof attract !== 'undefined' && attract)) return; invpop.hidden = true; colInGame = true; over.hidden = false; showCollection(colTab === 'movie' ? 'mon' : colTab); over.scrollTop = 0; }
+function closeColInGame() { if (!colInGame) return; colInGame = false; bgmPreview = null; hideOver(); render(); }
+const _showColG = showCollection; showCollection = function (tab) { if (colInGame && (tab || colTab) === 'movie') tab = 'mon'; _showColG.call(this, tab); if (!colInGame) return;
+  const mv = over.querySelector('[data-coltab="movie"]'); if (mv) mv.remove();
+  const bk = document.getElementById('colBack'); if (bk) { bk.textContent = '← ぼうけんに もどる'; bk.onclick = closeColInGame; } };
+document.getElementById('colBtn').onclick = () => { if (colInGame) return closeColInGame(); openColInGame(); };

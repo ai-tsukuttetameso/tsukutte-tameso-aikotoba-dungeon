@@ -5,7 +5,7 @@
 // ===== 階の しかけ：3階から、だいたい 3階に 1回 ルールが かわる =====
 const RULES = {
   dark: { name: 'くらやみの階', short: 'くらやみ', desc: 'まわり 2マスしか 見えない' },
-  ice: { name: 'こおりの階', short: 'こおり', desc: '歩くと 止まれずに すべっていく' },
+  ice: { name: 'こおりの階', short: 'こおり', desc: '歩くと 止まれずに すべっていく', tip: 'ヒント：ななめに 歩くと すべらない。ななめで 通路の 入口の 正面に 合わせてから まっすぐ 進もう' },
   hunger: { name: 'はらぺこの階', short: 'はらぺこ', desc: 'おなかが 2倍 はやく へる' },
   gold: { name: 'おかねの階', short: 'おかね', desc: 'お金が 2倍。お金も 多く おちている' },
   magic: { name: 'まりょくの階', short: 'まりょく', desc: 'わざの MPが 半分' },
@@ -74,10 +74,10 @@ const midBossAlive = () => G && G.mons.some(m => m.mid);
 function announceFloor(f) { const s = curSecret(), k = secretKey(), r = ruleOf(f);
   if (s && f === (P.startF || 1)) { showBanner('かくし合言葉！', `${s.name}：${s.desc}`); progMark('secret', k); sfx('clear'); return; }
   if (isMidFloor(f)) { showBanner(`地下${f}階：ぬしの 階`, 'ぬしを たおすまで 階段は ふういん'); say('この階には「ぬし」が いる。たおさないと 階段は ひらかない。'); sfx('boss'); return; }
-  if (r) { showBanner(RULES[r].name, RULES[r].desc); say(`${RULES[r].name}：${RULES[r].desc}。`); progMark('rules', r); } }
+  if (r) { showBanner(RULES[r].name, RULES[r].desc + (RULES[r].tip ? '（ななめなら すべらない）' : '')); say(`${RULES[r].name}：${RULES[r].desc}。`); if (RULES[r].tip) say(RULES[r].tip + '。'); progMark('rules', r); } }
 // こおりの階：歩いたら、かべ・敵・道具・階段の 手前まで すべる
 function iceSlide(dx, dy) { if (!ruleIs('ice') || (dx && dy)) return 0; let n = 0;
   while (n < 8) { const nx = P.x + dx, ny = P.y + dy;
     if (!isFloor(nx, ny) || monAt(nx, ny) || shopAt(nx, ny) || npcAt(nx, ny) || G.items.some(o => o.x === P.x && o.y === P.y) || (G.stairs.x === P.x && G.stairs.y === P.y)) break;
     P.x = nx; P.y = ny; n++; }
-  if (n) say(`つるつる……${n}マス すべった。`); return n; }
+  if (n) { say(`つるつる……${n}マス すべった。`); if (P.iceTipF !== G.f) { P.iceTipF = G.f; say('（ななめに 歩くと すべらない）'); } } return n; }

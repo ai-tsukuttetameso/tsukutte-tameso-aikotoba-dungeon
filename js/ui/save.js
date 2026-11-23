@@ -3,7 +3,7 @@
 
 function openSave() { if (!G || G.over || !floorStart) return; writeLocalSave(floorStart); invpop.hidden = false; invpop.dataset.mode = 'save';
   invpop.innerHTML = `<div><b style="color:#ffd23f">セーブ</b>　<button data-close="1">とじる</button></div>`
-    + `<div class="help">この端末に セーブしました。タイトルの「つづきから」で 再開できます。<br>セーブされるのは <b>地下${floorStart.f}階に 入ったときの 状態</b>です（その階の はじめから 再開）。</div>`
+    + `<div class="help">この端末に セーブしました。タイトルの「つづきから」で 再開できます。<br>セーブされるのは <b>地下${floorStart.f}階に 入ったときの 状態</b>です（その階の はじめから 再開）。</div><div class="help" style="color:#ff9a5c;margin-top:4px">この階に 入ってから 手に入れた物・お金・けいけんちは セーブに 入りません。つぎの 階に おりると、そこで 自動で セーブされます。</div>`
     + `<div class="help" style="margin-top:8px">ほかの端末や、あとで 再開するときは「ふっかつの合言葉」を メモしてください：</div><textarea id="saveCode" readonly rows="4" class="code">作っています…</textarea><button id="copyCode">ふっかつの合言葉を コピー</button>`;
   const ta = document.getElementById('saveCode'), bt = document.getElementById('copyCode');
   makeCode(floorStart).then(c => { ta.value = c; }, () => { ta.value = 'この ブラウザでは 合言葉を 作れませんでした（この端末への セーブは できています）'; bt.disabled = true; });

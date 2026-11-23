@@ -37,13 +37,13 @@ function showOver(kind) {
     + `<p class="tnote">合言葉と 深さが 同じなら、だれでも 同じ地図。友だちと 勝負できます</p>`
     + `<button id="goCode" class="tlink">ふっかつの合言葉で つづきから</button></section>`
     // ② 見る・あつめる ③ データ・せってい
-    + `<div class="tsub"><section class="tsec"><h2 class="tsh"><i>★</i>見る・あつめる</h2><div class="tbtns"><button id="goCol" class="alt">コレクション<small>図鑑・称号・おと</small></button><button id="goRec" class="alt">クリアの記録<small>タイムと シェア</small></button></div></section>`
+    + `<div class="tsub"><section class="tsec"><h2 class="tsh"><i>★</i>見る・あつめる</h2><div class="tbtns"><button id="goHelp" class="alt">あそびかた<small>操作と ルール</small></button><button id="goCol" class="alt">コレクション<small>図鑑・称号・おと</small></button><button id="goRec" class="alt">クリアの記録<small>タイムと シェア</small></button></div></section>`
     + `<section class="tsec"><h2 class="tsh"><i>⚙</i>データ・せってい</h2><div class="tbtns"><button id="goHero" class="alt">冒険者データ<small>そうこ・記録ファイルの ほぞん</small></button></div>${textSizeHtml()}</section></div>`
     + `<p class="tsound">♪ 画面を タップすると 音楽が ながれます</p></div>`;
   if (kind === 'dead') { const last = logAll.slice(-5);
     over.innerHTML = `<div><h1>力つきた……</h1><p>死因：<b style="color:#ff6b6b">${P.cause || 'なぞ'}</b></p><p>地下${G.f}階 ／ Lv${P.lv} ／ ${P.turn}ターン ／ ${P.gold}G</p><div class="last"><div>さいごの流れ</div>${last.map(l => `<div>・${l}</div>`).join('')}</div>${bestLine()}${jobLineHtml()}${bankLine}${again}</div>`; }
   if (kind === 'clear') over.innerHTML = `<div><h1>でかこわの王を たおした！</h1><p>${P.turn}ターンで クリア ／ Lv${P.lv} ／ ${P.gold}ゴールド</p>${shareBoxHtml(rec)}${jobLineHtml()}${bankLine}${again}</div>`;
-  wireShare(); wireTitleSave(); wireJobSel(); wireDiffSel(); const gt = document.getElementById('goTitle'); if (gt) gt.onclick = () => { showOver('title'); render(); }; const gr = document.getElementById('goRec'); if (gr) gr.onclick = showRecords;
+  wireShare(); wireTitleSave(); wireJobSel(); wireDiffSel(); const gt = document.getElementById('goTitle'); if (gt) gt.onclick = () => { showOver('title'); render(); }; const gr = document.getElementById('goRec'); if (gr) gr.onclick = showRecords; const ghw = document.getElementById('goHelp'); if (ghw) ghw.onclick = showHowto;
   document.getElementById('go').onclick = () => pickStart('random');
   document.getElementById('goDaily').onclick = () => pickStart('daily');
   const gh = document.getElementById('goHero'); if (gh) gh.onclick = showHero; const gc = document.getElementById('goCol'); if (gc) gc.onclick = () => showCollection();

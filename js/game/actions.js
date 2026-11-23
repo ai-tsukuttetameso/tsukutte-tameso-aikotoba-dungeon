@@ -23,9 +23,12 @@ function act(dx, dy) {
   if (!isFloor(nx, ny)) { render(); return; }
   P.x = nx; P.y = ny; iceSlide(dx, dy); step(); endTurn();
 }
-function elemHit(m, d, el, label) { const md = MON[m.t]; let note = ''; d = Math.round(d * magicPower);
-  if (el && md.weak === el) { d = Math.round(d * 1.6); note = '　こうかは ばつぐんだ！'; } else if (el && md.resist === el) { d = Math.max(1, Math.round(d * .5)); note = '　あまり きいていない……'; }
-  hitMon(m, d, `${label || m.name + 'に'} ${d}の ダメージ！${note}`); return d; }
+// ためして わかった 弱点・ききにくい属性は 図鑑に すぐ のせる（たおした 数に 関係なく）
+function elemLearn(t, cat) { if (!cat || previewRun || (typeof attract !== 'undefined' && attract)) return; const s = _progHas[cat], had = s ? s.has(t) : !!(loadProg()[cat] || {})[t];
+  progMark(cat, t); if (!had) say(`（${MON[t].name}の ${cat === 'weakKnown' ? '弱点' : 'ききにくい 属性'}が 図鑑に のった）`); }
+function elemHit(m, d, el, label) { const md = MON[m.t]; let note = '', learn = null; d = Math.round(d * magicPower);
+  if (el && md.weak === el) { d = Math.round(d * 1.6); note = '　こうかは ばつぐんだ！'; learn = 'weakKnown'; } else if (el && md.resist === el) { d = Math.max(1, Math.round(d * .5)); note = '　あまり きいていない……'; learn = 'resistKnown'; }
+  hitMon(m, d, `${label || m.name + 'に'} ${d}の ダメージ！${note}`); elemLearn(m.t, learn); return d; }
 // ダメージの ログ：のこり HPも 出す。とどめの 一撃も ダメージを 出してから たおす
 function hitMon(m, d, msg) { m.hp -= d; m.flash = 6; m.sleep = false; if (msg) say(msg + (m.hp > 0 ? `（のこり HP ${m.hp}/${m.mhp || m.hp}）` : '')); if (m.hp <= 0) killMon(m); }
 function killMon(m) {

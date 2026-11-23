@@ -4,7 +4,7 @@
 const KEYS = { ArrowUp: [0, -1], ArrowDown: [0, 1], ArrowLeft: [-1, 0], ArrowRight: [1, 0], w: [0, -1], s: [0, 1], a: [-1, 0], d: [1, 0], q: [-1, -1], e: [1, -1], z: [-1, 1], c: [1, 1], ' ': [0, 0] };
 let throwMode = false, invSel = 0;
 addEventListener('keydown', ev => {
-  if (!over.hidden) { if (ev.target && ev.target.tagName === 'INPUT') return; if (document.getElementById('startPick')) { if (ev.key === 'Escape') closeStartPick(); return; } if (ev.key === 'Enter') { ev.preventDefault(); pickStart('random'); } return; }
+  if (!over.hidden) { if (colInGame) { if (ev.key === 'Escape' || ev.key.toLowerCase() === 'k') { ev.preventDefault(); closeColInGame(); } return; } if (ev.target && ev.target.tagName === 'INPUT') return; if (document.getElementById('startPick')) { if (ev.key === 'Escape') closeStartPick(); return; } if (ev.key === 'Enter') { ev.preventDefault(); pickStart('random'); } return; }
   if (ev.key === 'Escape') { if (invpop.hidden && over.hidden && !throwMode) openQuit(); else invpop.hidden = true; throwMode = false; return; }
   if (!invpop.hidden && invpop.dataset.mode === 'inv') { const n = P.inv.length; const kk = ev.key.toLowerCase();
     if (ev.key === 'ArrowDown' || kk === 's') { invStep(1); ev.preventDefault(); return; }
@@ -17,6 +17,7 @@ addEventListener('keydown', ev => {
     if (kk === 'r') { sortInv(); return; } }
   if (ev.key.toLowerCase() === 'r' && invpop.hidden) { sortInv(); return; }
   if (ev.key.toLowerCase() === 'f' && invpop.hidden && over.hidden) { attackFront(); return; }
+  if (ev.key.toLowerCase() === 'k' && invpop.hidden && over.hidden && !ev.ctrlKey && !ev.metaKey) { openColInGame(); return; }
   if (ev.key.toLowerCase() === 'b' && (invpop.hidden || invpop.dataset.mode === 'inv')) { openBags(); return; }
   if (!invpop.hidden && invpop.dataset.mode === 'skill') { if (ev.key === 'Tab') { ev.preventDefault(); nextSkTab(); return; } if (/^[1-9]$/.test(ev.key)) { const s = tabSkills().filter(x => P.lv >= x.lv)[+ev.key - 1]; if (s) { invpop.hidden = true; useSkill(s.id); } return; } if (ev.key.toLowerCase() === 'm') { invpop.hidden = true; return; } }
   if (ev.shiftKey && /^Digit[1-9]$/.test(ev.code)) { const s = skillByNum(+ev.code.slice(5)); if (s) { ev.preventDefault(); invpop.hidden = true; useSkill(s.id); } return; }

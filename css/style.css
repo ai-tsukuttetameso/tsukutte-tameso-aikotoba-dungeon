@@ -197,7 +197,7 @@ textarea.code{width:100%;font-family:monospace;font-size:13px;background:#17122a
   .row{grid-template-columns:minmax(0,1fr)}
   .ctl{flex:1;min-width:0;grid-template-columns:repeat(3,minmax(0,1fr));grid-auto-rows:1fr;gap:4px}
   .ctl .big{grid-column:1/4;font-size:15px;padding:2px 4px}.ctl .big br{display:none}
-  .ctl #sndBtn{grid-column:span 2}
+  .ctl #sndBtn{grid-column:auto}
   .ctl .sub{font-size:clamp(11px,3.4vw,14px)!important;padding:2px 1px!important;min-height:40px;min-width:0;overflow:hidden;letter-spacing:-.04em}
   .invpop{font-size:15px}
   .invpop button{min-height:40px}
@@ -375,7 +375,7 @@ textarea.code{width:100%;font-family:monospace;font-size:13px;background:#17122a
   .pad{grid-template-columns:repeat(3,46px);grid-template-rows:repeat(3,46px);gap:3px}
   .ctl{width:100%;grid-template-columns:repeat(3,minmax(0,1fr));gap:3px}
   .ctl .big{grid-column:1/4;font-size:14px;padding:3px 4px}.ctl .big br{display:none}
-  .ctl #sndBtn{grid-column:span 2}
+  .ctl #sndBtn{grid-column:auto}
   .ctl .sub{font-size:12px!important;padding:4px 1px!important;min-width:0;overflow:hidden}
   .skbar{flex-wrap:nowrap;overflow-x:auto;padding:2px}
   .over .jobrow.up10{gap:2px}
@@ -464,3 +464,24 @@ small.rule.ura{background:#5a1f7a;border-color:#b34dff;color:#f0d0ff}
 .trpop .trrow{display:flex;flex-direction:column;gap:2px;background:#0008;border:1px solid #4d4080;border-radius:6px;padding:6px 8px}
 .trpop .trrow b{color:#7cf0a0;font-weight:400}.trpop .trrow small{color:#cfc6e6;font-size:12px}
 .trpop .trrow.empty{border-style:dashed}.trpop .trrow.empty small{color:#7d7499}.trpop .trrow.cur small{color:#ff9a9a}
+
+/* かじやの ジャンル */
+.invpop .tabs.genres{flex-wrap:wrap}.invpop .tabs.genres button small{opacity:.75}
+
+/* わざの 効果・おもい の しるし */
+.hud .buffs{display:inline-flex;flex-wrap:wrap;gap:4px}
+.hud .buff{font-size:.72em;color:#0d0a1c;background:#9ad0ff;border-radius:4px;padding:0 5px;line-height:1.5}
+.hud .buff.heavy{background:#ff9a5c}.hud .buff.light{background:#7cf0a0}
+
+/* あそびかた */
+.over .howto{max-width:46em;margin:0 auto;text-align:left}
+.over .howto .howsec{background:#0009;border:1px solid #4d4080;border-radius:8px;padding:8px 12px;margin:8px 0}
+.over .howto h2{font-size:17px;color:#ffd23f;margin:0 0 4px;font-weight:400}
+.over .howto ul{margin:0;padding-left:1.2em;display:grid;gap:3px}.over .howto li{line-height:1.5}
+.over .howto li small{color:#a79fb8}.over .howto li b{color:#7cf0a0;font-weight:400}
+
+/* ★よく使う わざの 順番 */
+.skrow .favmv{display:flex;flex-direction:column;gap:2px;flex:0 0 auto}
+.skrow .favmv button{width:34px;flex:1;margin:0;padding:0;font-size:12px;line-height:1}
+.skrow .favmv button[disabled]{opacity:.3}
+.skbar .skstar{font-style:normal;color:#ffd23f;font-size:.8em;margin-right:1px}

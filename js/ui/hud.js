@@ -20,6 +20,18 @@ const _htmlCache = {};
 // 中身が かわった ときだけ 書きかえる（ボタンが 押している途中で 消えないように）
 function setHtml(id, html) { if (_htmlCache[id] === html) return; _htmlCache[id] = html; document.getElementById(id).innerHTML = html; }
 const KEYLBL = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '^'];
+// おもい ときの しるし（おなかの よこ）
+const heavyTag = () => typeof loadOver === 'function' && loadOver() ? (loadFree() ? ' <small class="buff light" title="にもつが おもいけど、かるがるなので ふつうの へりかた">かるがる</small>' : ` <small class="buff heavy" title="にもつが 12こを こえている。おなかが へりやすい">おもい＋${loadOver()}</small>`) : '';
+// いま 効いている わざ・ようすと のこりターン
+function buffHtml() { const b = [];
+  if (P.teppeki > 0) b.push(['てっぺき', P.teppeki, 'うける ダメージが 半分']);
+  if (P.mikiri > 0) b.push(['みきり', P.mikiri, '敵の こうげきを よける']);
+  if (P.bunshin > 0) b.push(['分身', P.bunshin, '分身が こうげきを うける']);
+  if (P.charge) b.push(['ためる', 0, 'つぎの こうげきが 2.5倍']);
+  if (P.buffAtk) b.push([`こうげき＋${P.buffAtk}`, 0, 'この階の あいだ']);
+  if (P.karuT > 0) b.push(['かるがる', P.karuT, 'にもつが おもくても ふつうの へりかた']);
+  if (P.skip > 0) b.push(['おどり', P.skip, 'かってに おどって うごけない']);
+  return b.length ? `<span class="buffs">${b.map(([n, t, d]) => `<small class="buff" title="${d}">${n}${t ? ' ' + t : ''}</small>`).join('')}</span>` : ''; }
 function drawHud() {
   const low = P.hp <= P.mhp * .3, hungry = P.food <= 15;
   const hud = [
@@ -28,7 +40,7 @@ function drawHud() {
     `<span>${icon('star', 'レベル')}Lv <b>${P.lv}</b> <small class="nx">つぎまで ${expNext()}</small></span>`,
     `<span class="${P.pinch ? 'low pinch' : low ? 'low' : ''}">${icon('heart', 'HP')}HP <b>${Math.max(0, P.hp)}</b>/${P.mhp}</span>`,
     `<span>${icon('drop', 'MP')}MP <b class="mpv">${P.mp}</b>/${P.mmp}</span>`,
-    `<span class="${hungry ? 'low' : ''}">${icon('rice', 'おなか')}おなか <b>${P.food}</b>%</span>`,
+    `<span class="${hungry ? 'low' : ''}">${icon('rice', 'おなか')}おなか <b>${P.food}</b>%${heavyTag()}</span>`,
     `<span>${icon('coin', 'ゴールド')}ゴールド <b>${P.gold}</b></span>`,
     `<span>${icon('sword', 'こうげき')}こうげき <b>${atkTotal()}</b></span>`,
     `<span>${icon('shield', 'ぼうぎょ')}ぼうぎょ <b>${defTotal()}</b></span>`,
@@ -41,14 +53,14 @@ function drawHud() {
     `<span>${icon('star', 'レベル')}Lv<b>${P.lv}</b></span>`,
     `<span class="${P.pinch ? 'low pinch' : low ? 'low' : ''}">${icon('heart', 'HP')}<b>${Math.max(0, P.hp)}</b>/${P.mhp}</span>`,
     `<span>${icon('drop', 'MP')}<b class="mpv">${P.mp}</b>/${P.mmp}</span>`,
-    `<span class="${hungry ? 'low' : ''}">${icon('rice', 'おなか')}<b>${P.food}</b>%</span>`,
+    `<span class="${hungry ? 'low' : ''}">${icon('rice', 'おなか')}<b>${P.food}</b>%${heavyTag()}</span>`,
     `<span>${icon('coin', 'ゴールド')}<b>${P.gold}</b>G</span>`,
     `<span>${icon('sword', 'こうげき')}<b>${atkTotal()}</b></span>`,
     `<span>${icon('shield', 'ぼうぎょ')}<b>${defTotal()}</b></span>`,
     `<span>${icon('hourglass', 'ターン')}${P.turn}</span>`,
     treasure ? '<span><small class="tre">おたから</small></span>' : '',
   ];
-  setHtml('hud', (innerWidth < 640 ? hudS : hud).join(''));
+  const bf = buffHtml(); setHtml('hud', (innerWidth < 640 || (innerHeight <= 520 && innerWidth < 900) ? hudS : hud).join('') + bf);
   document.getElementById('log').innerHTML = logs.map(l => `<div>${l}</div>`).join('');
   const db = document.getElementById('downBtn'); if (db) db.disabled = !(P.x === G.stairs.x && P.y === G.stairs.y);
   tidyEq(); const row = (o, i) => `<span class="it"><button data-i="${i}" title="${itemDesc(o)}"${o.eq ? ' class="eq"' : ''}>${o.eq ? '[E] ' : KEYLBL[i] + '. '}${nameHtml(o)}${ITEMS[o.k].equip ? `<small class="eqtag">${o.eq ? 'はずす' : 'そうび'}</small>` : ''}</button>${trBtn(o, i)}<button class="s" data-t="${i}" title="向いている方向に投げる">なげ</button><button class="s" data-d="${i}" title="足もとに おく">おく</button></span>`;

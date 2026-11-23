@@ -16,10 +16,10 @@ function openBag(o) { bagObj = o; tossAsk = ''; invpop.hidden = false; drawBag()
 function drawBag(msg) { const o = bagObj; invpop.dataset.mode = 'bag';
   const can = P.inv.map((x, i) => [x, i]).filter(([x]) => x !== o && !ITEMS[x.k].bag && !x.eq && !x.unpaid);
   invpop.innerHTML = (msg ? `<div class="shopmsg">${msg}</div>` : '') + `<div><b style="color:#ffd23f">${itemName(o)}</b>　<button data-close="1">とじる</button></div>`
-    + `<div class="help">中に 入っている物（名前で とりだす・「使う」で その場で 使う）${o.items.length ? ' <button data-outall="1">ぜんぶ 出す</button>' : ''}</div>` + (o.items.length ? o.items.map((x, j) => `<span class="it"><button data-out="${j}">${nameHtml(x)}</button>${ITEMS[x.k].equip ? '' : `<button class="s" data-use="${j}">使う</button>`}<button class="s" data-put="${j}">おく</button>${tossBtn('b:' + j, x)}</span>`).join('') : '<span class="help">からっぽ</span>')
+    + `<div class="help">中に 入っている物（名前で とりだす・「使う」で その場で 使う）${o.items.length ? ' <button data-outall="1">ぜんぶ 出す</button>' : ''}</div>` + (o.items.length ? o.items.map((x, j) => `<span class="it"><button data-out="${j}">${nameHtml(x)}</button>${ITEMS[x.k].equip ? '' : `<button class="s" data-use="${j}">使う</button>`}${trBtn(x, j)}<button class="s" data-put="${j}">おく</button>${tossBtn('b:' + j, x)}</span>`).join('') : '<span class="help">からっぽ</span>')
     + `<div class="help" style="margin-top:6px">もちものから しまう（あと ${o.cap - o.items.length}こ）${can.length && o.items.length < o.cap ? ' <button data-inall="1">入るだけ しまう</button>' : ''}</div>` + (can.length ? can.map(([x, i]) => `<button data-in="${i}">${nameHtml(x)}</button>`).join('') : '<span class="help">しまえる物が ない（そうび中の物は しまえない）</span>');
   invpop.scrollTop = 0; }
-function bagClick(b) { const o = bagObj;
+function bagClick(b) { const o = bagObj; if (b.dataset.tr !== undefined) { showTraitPop(o.items[+b.dataset.tr]); return; }
   if (b.dataset.toss) { const k = b.dataset.toss; if (tossAsk !== k) { tossAsk = k; return drawBag(); } return drawBag(tossFromBag(o, +k.split(':')[1])); }
   tossAsk = '';
   if (b.dataset.put !== undefined) { const m = placeFromBag(o, +b.dataset.put, () => { bagObj = o; drawBag(); }); if (m) drawBag(m); return; }
@@ -44,10 +44,10 @@ function drawBags(msg) { invpop.dataset.mode = 'bags'; const bags = myBags();
   invpop.innerHTML = (msg ? `<div class="shopmsg">${msg}</div>` : '') + `<div><b style="color:#ffd23f">袋の中身 一覧</b>（${bags.length}こ・空き ${room}）　<button data-close="1">とじる</button></div>`
     + `<div class="help">もちものの ${stashable().length}こを しまえます。<button data-stash="1"${stashable().length && room ? '' : ' disabled'}>ぜんぶの袋に 入るだけ しまう</button></div>`
     + (bags.length ? bags.map(b => { const bi = P.inv.indexOf(b);
-      return `<div class="bagbox"><div class="baghd">${nameHtml(b)}</div>` + (b.items.length ? b.items.map((x, j) => `<div class="row1"><button data-bu="${bi}:${j}" title="${ITEMS[x.k].equip ? '' : '使う'}">${nameHtml(x)}<br><small style="color:#a79fb8">${ITEMS[x.k].equip ? 'そうびは 出してから 付ける・' : 'タップで 使う・'}${itemDesc(x)}</small></button><button class="s" data-bo="${bi}:${j}">出す</button><button class="s" data-bp="${bi}:${j}">おく</button>${tossBtn(bi + ':' + j, x)}</div>`).join('') : '<span class="help">からっぽ</span>') + '</div>'; }).join('')
+      return `<div class="bagbox"><div class="baghd">${nameHtml(b)}</div>` + (b.items.length ? b.items.map((x, j) => `<div class="row1"><button data-bu="${bi}:${j}" title="${ITEMS[x.k].equip ? '' : '使う'}">${nameHtml(x)}<br><small style="color:#a79fb8">${ITEMS[x.k].equip ? 'そうびは 出してから 付ける・' : 'タップで 使う・'}${itemDesc(x)}</small></button>${trBtn(x, bi + ':' + j)}<button class="s" data-bo="${bi}:${j}">出す</button><button class="s" data-bp="${bi}:${j}">おく</button>${tossBtn(bi + ':' + j, x)}</div>`).join('') : '<span class="help">からっぽ</span>') + '</div>'; }).join('')
       : '<span class="help">しまう袋を もっていない</span>');
 }
-function bagsClick(b) {
+function bagsClick(b) { if (b.dataset.tr !== undefined) { const [bi, j] = String(b.dataset.tr).split(':').map(Number), bag = P.inv[bi]; showTraitPop(bag && bag.items && bag.items[j]); return; }
   if (b.dataset.toss) { const k = b.dataset.toss; if (tossAsk !== k) { tossAsk = k; return drawBags(); } const [bi, j] = k.split(':').map(Number); const bag = P.inv[bi]; return drawBags(bag && bag.items ? tossFromBag(bag, j) : ''); }
   tossAsk = '';
   if (b.dataset.bp) { const [bi, j] = b.dataset.bp.split(':').map(Number); const bag = P.inv[bi]; if (!bag || !bag.items) return drawBags(); const m = placeFromBag(bag, j, drawBags); if (m) drawBags(m); return; }
