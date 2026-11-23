@@ -71,7 +71,7 @@ function step() {
       else if (!invFull()) { if (it.price) o.unpaid = it.price; if (jobHas('items') && !isKnown(o.k) && !ITEMS[o.k].bag) { P.known.add(o.k); say(`どうぐつかいの 目で ${itemName(o)}だと わかった。`); } P.inv.push(o); G.items = G.items.filter(x => x !== it); sfx('pick');
         say(it.price ? `${itemName(o)}（${it.price}G）を 手にとった。${isKnown(o.k) ? ITEMS[o.k].desc + '。' : ''}店主に話しかけると 買える。` : `${itemName(o)}を ひろった。` + (o.traits && o.traits.length && isKnown(o.k) ? `（${o.traits.map(x => TRAITS[x].name).join('・')}つき！）` : '')); }
       else if (!it.price && !ITEMS[o.k].bag && bagWithRoom()) { const bag = bagWithRoom(); bag.items.push(o); G.items = G.items.filter(x => x !== it); sfx('pick'); say(`もちものが いっぱいなので、${itemName(o)}を ${itemName(bag)}に 入れて ひろった。`); }
-      else { const nm = it.o ? itemName(it.o) : (isKnown(it.k) ? ITEMS[it.k].name : FAKE[it.k]); say(`${nm}${it.price ? `（${it.price}G）` : ''}が おちている。でも もちものが いっぱいで ひろえない。（${invCount()}/${INV_MAX}）`); }
+      else { const nm = it.o ? itemName(it.o) : (isKnown(it.k) ? ITEMS[it.k].name : FAKE[it.k]); say(`${nm}${it.price ? `（${it.price}G）` : ''}が おちている。でも もちものが いっぱいで ひろえない。（${invCount()}/${invMax()}）`); }
     }
   }
   // もどりの まほうじん：ふりだしのわなで もどされた 階へ もどる
@@ -163,6 +163,7 @@ function spawnFar() { const rs = G.rooms.filter(r => !roomOf2(r, P.x, P.y)); con
 function endTurn() {
   P.turn++; G.ft++;
   if (P.turn % ((hasTrait('haramochi') ? 12 : 6) / (ruleIs('hunger') ? 2 : 1)) === 0) { if (P.food > 0) P.food--; else { P.hp -= 1; P.cause = 'はらぺこ'; say('おなかが へって 動けない……。'); } }
+  loadHunger();
   if (P.turn % 5 === 0 && P.food > 0) P.hp = Math.min(P.mhp, P.hp + 1);
   if (P.turn % 4 === 0 && P.food > 0) P.mp = Math.min(P.mmp, P.mp + 1);
   if (hasTrait('saisei') && P.turn % 3 === 0 && P.food > 0) P.hp = Math.min(P.mhp, P.hp + 1);

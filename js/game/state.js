@@ -16,7 +16,8 @@ const atkTotal = () => { const a = eqItem('arm'); return P.atk + eqVal('atk') + 
 const eqPerk = p => P.inv.some(o => o.eq && ITEMS[o.k].perk === p);
 // そうび中の物は「そうびバッグ」あつかいで、もちものの 数（INV_MAX）に 数えない
 const invCount = () => P.inv.filter(o => !o.eq).length;
-const invFull = () => invCount() >= INV_MAX;
+const invMax = () => INV_MAX;  // もちものの わく（番号キーで 使える 12こまで）
+const invFull = () => invCount() >= invMax();
 // そうび中の物を もちものの うしろに まとめる（番号キー 1〜^ は もちものだけに つく）
 function tidyEq() { const a = P.inv.filter(o => !o.eq), b = P.inv.filter(o => o.eq); if (b.length && P.inv.slice(a.length).some(o => !o.eq)) P.inv = [...a, ...b]; }
 const eqName = s => { const o = eqItem(s); return o ? itemName(o) : (s === 'atk' ? 'すで' : 'なし'); };
