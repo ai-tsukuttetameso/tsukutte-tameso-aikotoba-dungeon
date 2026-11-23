@@ -24,7 +24,20 @@ function drawHud() {
     `<span>${icon('armor', 'そうび')}そうび <b>${eqName('atk')}</b>／防具 <b>${ARMOR_SLOTS.filter(eqItem).length}</b>/${ARMOR_SLOTS.length}</span>`,
     `<span>${icon('hourglass', 'ターン')}ターン ${P.turn}</span>`,
   ];
-  setHtml('hud', hud.join(''));
+  // スマホは 1行を みじかく（文字を へらして、2〜3行に おさめる）
+  const hudS = [
+    `<span>${icon('stairs', '階')}<b>${G.f}</b>/${LAST}階</span>`,
+    `<span>${icon('star', 'レベル')}Lv<b>${P.lv}</b></span>`,
+    `<span class="${P.pinch ? 'low pinch' : low ? 'low' : ''}">${icon('heart', 'HP')}<b>${Math.max(0, P.hp)}</b>/${P.mhp}</span>`,
+    `<span>${icon('drop', 'MP')}<b class="mpv">${P.mp}</b>/${P.mmp}</span>`,
+    `<span class="${hungry ? 'low' : ''}">${icon('rice', 'おなか')}<b>${P.food}</b>%</span>`,
+    `<span>${icon('coin', 'ゴールド')}<b>${P.gold}</b>G</span>`,
+    `<span>${icon('sword', 'こうげき')}<b>${atkTotal()}</b></span>`,
+    `<span>${icon('shield', 'ぼうぎょ')}<b>${defTotal()}</b></span>`,
+    `<span>${icon('hourglass', 'ターン')}${P.turn}</span>`,
+    treasure ? '<span><small class="tre">おたから</small></span>' : '',
+  ];
+  setHtml('hud', (innerWidth < 640 ? hudS : hud).join(''));
   document.getElementById('log').innerHTML = logs.map(l => `<div>${l}</div>`).join('');
   const db = document.getElementById('downBtn'); if (db) db.disabled = !(P.x === G.stairs.x && P.y === G.stairs.y);
   tidyEq(); const row = (o, i) => `<span class="it"><button data-i="${i}" title="${itemDesc(o)}"${o.eq ? ' class="eq"' : ''}>${o.eq ? '[E] ' : KEYLBL[i] + '. '}${nameHtml(o)}${ITEMS[o.k].equip ? `<small class="eqtag">${o.eq ? 'はずす' : 'そうび'}</small>` : ''}</button><button class="s" data-t="${i}" title="向いている方向に投げる">なげ</button><button class="s" data-d="${i}" title="足もとに おく">おく</button></span>`;

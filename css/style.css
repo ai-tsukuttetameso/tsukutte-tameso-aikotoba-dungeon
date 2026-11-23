@@ -174,3 +174,31 @@ textarea.code{width:100%;font-family:monospace;font-size:13px;background:#17122a
 /* 記録コード */
 .over .bktxt{width:100%;box-sizing:border-box;min-height:5.5em;font:12px/1.4 monospace;background:#17122a;color:#f2ecdf;border:2px solid #4d4080;border-radius:6px;padding:6px;word-break:break-all;margin-top:6px}
 .over .backup button{font-size:15px}
+
+/* スマホ：冒険中は 1画面に おさめる。ボタンは 指で おしやすい 大きさに */
+@media (max-width:640px){
+  .wrap{height:100dvh;min-height:0;grid-template-rows:none;grid-template-columns:minmax(0,1fr);align-content:start;gap:4px;padding-block:max(4px,env(safe-area-inset-top,0px)) max(4px,env(safe-area-inset-bottom,0px))}
+  .wrap:not(.titlemode){overflow:hidden}
+  .wrap.titlemode{height:auto;min-height:100dvh}
+  .hud{font-size:14px;gap:1px 10px;padding:3px 8px}
+  .hud .ic{height:1.15em}
+  .stagebox{display:flex;justify-content:center}
+  /* ログは 高さを きめておく（行が かわるたびに 地図の 大きさが ゆれないように）。新しい 行が 上 */
+  .log{font-size:13px;padding:4px 10px;line-height:1.35;height:calc(3 * 1.35em + 8px);min-height:0;overflow:hidden}
+  .tip{display:none}
+  .skbar{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;padding:3px 4px}
+  .skbar::-webkit-scrollbar{display:none}
+  .skbar button{flex:none;min-height:40px;font-size:14px;padding:3px 10px}
+  .skbar .sktabs{flex-wrap:nowrap;flex:none}.skbar .sktabs button{min-height:32px}
+  .skbar .sklbl,.skbar .skmp{flex:none}
+  .row,.side{min-width:0}.side{gap:8px;align-items:stretch;justify-content:space-between}
+  .pad{--pb:min(60px,14.5vw);grid-template-columns:repeat(3,var(--pb));grid-template-rows:repeat(3,var(--pb));gap:4px;flex:none}
+  .pad button{font-size:24px;padding:0}
+  .row{grid-template-columns:minmax(0,1fr)}
+  .ctl{flex:1;min-width:0;grid-template-columns:repeat(3,minmax(0,1fr));grid-auto-rows:1fr;gap:4px}
+  .ctl .big{grid-column:1/4;font-size:15px;padding:2px 4px}.ctl .big br{display:none}
+  .ctl #sndBtn{grid-column:span 2}
+  .ctl .sub{font-size:clamp(11px,3.4vw,14px)!important;padding:2px 1px!important;min-height:40px;min-width:0;overflow:hidden;letter-spacing:-.04em}
+  .invpop{font-size:15px}
+  .invpop button{min-height:40px}
+}
