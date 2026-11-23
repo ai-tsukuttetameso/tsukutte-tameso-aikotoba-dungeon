@@ -106,7 +106,21 @@ const TRAITS = {
   honoo: { name: '炎の刃', slot: 'atk', desc: 'ふつうの こうげきが 炎の属性に なる' },
   koori: { name: '氷の刃', slot: 'atk', desc: 'ふつうの こうげきが 氷の属性に なる' },
   hanekaeshi: { name: 'はねかえし', slot: 'def', desc: 'うけたダメージの半分を 敵に返す' },
+  // ここから 防具の 特性（あとから ふやした）
+  saifu: { name: 'さいふのひも', slot: 'def', desc: 'お金を ぬすまれない。お金の わなも 効かない' },
+  mikawashi: { name: 'みかわし', slot: 'def', desc: '敵の こうげきを 8回に1回 よける' },
+  saisei: { name: 'じわじわ回復', slot: 'def', desc: '3ターンごとに HP＋1' },
+  maryoku: { name: 'まりょく回復', slot: 'def', desc: '5ターンごとに MP＋1' },
+  gakeppuchi: { name: 'がけっぷち', slot: 'def', desc: 'HPが のこり3わり以下だと こうげき1.5倍' },
+  manabi: { name: 'まなび', slot: 'def', desc: '敵を たおした けいけんちが 1.2倍' },
+  kinun: { name: 'きんうん', slot: 'def', desc: 'ひろう お金が 1.3倍' },
+  chizu: { name: 'ちずよみ', slot: 'def', desc: '階に 入ると 階段の 場所が わかる' },
+  robomamori: { name: 'ロボよけ', slot: 'def', desc: 'AI暴走ロボからの ダメージが 半分' },
+  dekamamori: { name: 'でかこわよけ', slot: 'def', desc: 'でかこわ（王も）からの ダメージが 4分の3' },
 };
+// 道具が 生まれるときに 特性を えらぶ 元の 一覧（ここは かえない＝同じ 合言葉の 乱数の 並びを そのままに する）。
+// あとから ふやした 特性は、べつの 乱数（trRoll）で 入れかえて 出す
+const GEN_TRAITS = { atk: ['dekakiller', 'robokiller', 'kyuketsu', 'honoo', 'koori'], def: ['nekoyoke', 'togeyoke', 'haramochi', 'hanekaeshi'] };
 const INV_MAX = 12;
 // 防具の 部位の 名前（そうびの せつめいに つかう）
 // 食べる：おなか・HP・MPを ふやして、ふえた ぶんを 書いた 文を かえす

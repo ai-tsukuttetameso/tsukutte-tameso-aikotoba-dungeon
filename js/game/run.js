@@ -11,7 +11,7 @@ const DEPTHS = [10, 20, 30, 50, 100];
 // startF＝はじめる 階（10階ごとの 再開ポイント）。preview＝起動したときの タイトルの うしろの 画面（セーブも 冒険者データも さわらない）
 let previewRun = false;
 function newGame(mode, pw, depth, startF = 1, preview = false) {
-  previewRun = preview;
+  previewRun = preview; P.startF = startF > 1 && startF <= (DEPTHS.includes(+depth) && mode === 'pw' ? +depth : 10) ? startF : 1;
   runMode = mode === true ? 'daily' : mode === 'pw' ? 'pw' : mode === 'daily' ? 'daily' : 'random';
   daily = runMode === 'daily' ? todayKey() : '';
   password = runMode === 'daily' ? 'きょうの' + daily : runMode === 'pw' ? String(pw).trim().slice(0, 24) : randomPw();
@@ -39,6 +39,7 @@ function enterFloor(f) {
   if (typeof mmw !== 'undefined') mmw.classList.remove('big');
   const unpaid = P.inv.filter(o => o.unpaid); if (unpaid.length) { for (const o of unpaid) delete o.unpaid; say('お金を はらわずに にげきった……！'); }
   P.buffAtk = 0; G = genFloor(f); P.x = G.start.x; P.y = G.start.y; if (jobHas('trapper')) for (const t of G.traps) t.found = true; P.wasInShop = false; reveal();
+  if (hasTrait('chizu')) { G.seen[G.stairs.y][G.stairs.x] = true; say('ちずよみ：この階の 階段の 場所が わかった。'); }
   if (f !== 1) P.backF = 0; else if (P.backF > 1) placePortal(P.backF);
   if (G.shop) say('この階には「AIかじや」が いるらしい。');
   if (f === LAST) { showBanner('でかこわの王の階', 'たおせば クリア'); shake(8); sfx('boss'); }

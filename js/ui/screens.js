@@ -30,7 +30,7 @@ function showOver(kind) {
     over.innerHTML = `<div><h1>力つきた……</h1><p>死因：<b style="color:#ff6b6b">${P.cause || 'なぞ'}</b></p><p>地下${G.f}階 ／ Lv${P.lv} ／ ${P.turn}ターン ／ ${P.gold}G</p><div class="last"><div>さいごの流れ</div>${last.map(l => `<div>・${l}</div>`).join('')}</div>${bestLine()}${jobLineHtml()}${bankLine}${again}</div>`; }
   if (kind === 'clear') over.innerHTML = `<div><h1>でかこわの王を たおした！</h1><p>${P.turn}ターンで クリア ／ Lv${P.lv} ／ ${P.gold}ゴールド</p>${shareBoxHtml(rec)}${jobLineHtml()}${bankLine}${again}</div>`;
   wireShare(); wireTitleSave(); wireJobSel(); const gt = document.getElementById('goTitle'); if (gt) gt.onclick = () => { showOver('title'); render(); }; const gr = document.getElementById('goRec'); if (gr) gr.onclick = showRecords;
-  document.getElementById('go').onclick = () => { newGame('random'); render(); };
+  document.getElementById('go').onclick = () => pickStart('random');
   document.getElementById('goDaily').onclick = () => pickStart('daily');
   const gh = document.getElementById('goHero'); if (gh) gh.onclick = showHero;
   const gs = document.getElementById('goSame'); if (gs) gs.onclick = () => runMode === 'daily' ? pickStart('daily') : pickStart('pw', password, LAST);

@@ -1,7 +1,7 @@
 // ダンジョンの生成（部屋・通路・敵・アイテム・わな・お店）
 'use strict';
 
-function genFloor(f) { const saved = seed; P.visits[f] = (P.visits[f] || 0) + 1; seed = hashSeed(runSeed + ':' + f + ':' + P.visits[f]); rnd(); rnd();
+function genFloor(f) { const saved = seed; P.visits[f] = (P.visits[f] || 0) + 1; seed = hashSeed(runSeed + ':' + f + ':' + P.visits[f]); rnd(); rnd(); trReset(f, P.visits[f]);
   try { return genFloorInner(f); } finally { seed = saved; } }
 function genFloorInner(f) {
   const map = Array.from({ length: H }, () => Array(W).fill(0));

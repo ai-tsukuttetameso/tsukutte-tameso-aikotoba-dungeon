@@ -15,7 +15,7 @@ const runLabel = r => r.mode === 'daily' ? `今日のダンジョン（${r.daily
 function saveClear() {
   const d = new Date(), pad = n => String(n).padStart(2, '0');
   const r = { at: `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`,
-    mode: runMode, pw: password, daily, depth: LAST, treasure, key: runKey(), turn: P.turn, lv: P.lv, gold: P.gold, job: P.job };
+    mode: runMode, pw: password, daily, depth: LAST, treasure, key: runKey(), turn: P.turn, lv: P.lv, gold: P.gold, job: P.job, from: P.startF || 1 };
   const a = loadClears(); a.push(r); while (a.length > REC_MAX) a.shift();
   try { localStorage.setItem(REC_KEY, JSON.stringify(a)); } catch (e) {}
   return r; }
@@ -25,7 +25,7 @@ function rankOf(r) { const same = loadClears().filter(x => x.key === r.key).sort
 
 function shareText(r) {
   const where = r.mode === 'daily' ? `今日のダンジョン（${r.daily}）` : `合言葉「${r.pw}」の 地下${r.depth || 10}階${r.treasure ? '（おたから）' : ''}ダンジョン`;
-  return `${GAME_NAME}を ${r.turn}ターンで クリア！（${JOBS[r.job] ? JOBS[r.job].name + '・' : ''}Lv${r.lv}・${r.gold}G）\n${where}は、同じ合言葉と 深さを えらぶと だれでも 同じ地図で 挑戦できます。\n${SHARE_TAGS}${SHARE_URL ? '\n' + SHARE_URL : ''}`; }
+  return `${GAME_NAME}を ${r.from > 1 ? `地下${r.from}階から ` : ''}${r.turn}ターンで クリア！（${JOBS[r.job] ? JOBS[r.job].name + '・' : ''}Lv${r.lv}・${r.gold}G）\n${where}は、同じ合言葉と 深さを えらぶと だれでも 同じ地図で 挑戦できます。\n${SHARE_TAGS}${SHARE_URL ? '\n' + SHARE_URL : ''}`; }
 
 // クリア画面に 出す「記録とシェア」の部分
 // u＝おなじ 画面に いくつも 出すときの 見分け（クリアの記録の 一覧で つかう）
@@ -45,7 +45,7 @@ function recordsHtml() { const a = loadClears();
   const groups = {}; for (const r of a) (groups[r.key] = groups[r.key] || []).push(r);
   return Object.values(groups).sort((x, y) => y.length - x.length).map(g => { g.sort((p, q) => p.turn - q.turn);
     return `<div class="recgrp"><div class="rechd">${escH(runLabel(g[0]))}　<small>${g.length}回 クリア</small></div>`
-      + g.slice(0, 10).map((r, i) => { const id = a.indexOf(r); return `<div class="recrow"><span>${i + 1}位</span><b>${r.turn}ターン</b><span>Lv${r.lv}</span><span>${JOBS[r.job] ? JOBS[r.job].name + '・' : ''}${r.gold}G</span><small>${r.at}</small><button class="recsh" data-share="${id}">シェア</button></div><div class="recshbox" id="recsh${id}" hidden></div>`; }).join('') + '</div>'; }).join(''); }
+      + g.slice(0, 10).map((r, i) => { const id = a.indexOf(r); return `<div class="recrow"><span>${i + 1}位</span><b>${r.turn}ターン</b><span>Lv${r.lv}${r.from > 1 ? `<small>（${r.from}階から）</small>` : ''}</span><span>${JOBS[r.job] ? JOBS[r.job].name + '・' : ''}${r.gold}G</span><small>${r.at}</small><button class="recsh" data-share="${id}">シェア</button></div><div class="recshbox" id="recsh${id}" hidden></div>`; }).join('') + '</div>'; }).join(''); }
 function showRecords() { over.className = 'over recs'; over.innerHTML = `<div class="recpage"><h1>クリアの 記録</h1><p class="tnote">この 端末に のこっている 記録です（合言葉ごとに ターンの 少ない順）</p>${recordsHtml()}<button id="recBack">もどる</button></div>`;
   document.getElementById('recBack').onclick = () => showOver('title');
   // 記録ごとの「シェア」：その 記録の シェア文と Xに 投稿する ボタンを 下に ひらく（もう一度 おすと とじる）

@@ -247,3 +247,4 @@ textarea.code{width:100%;font-family:monospace;font-size:13px;background:#17122a
 .invpop button.pick.on{border-color:#ffd23f;background:#3a2f66}.invpop .ck{color:#ffd23f}
 .invpop .multibar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:#3a1a2a;border:1px solid #ffd23f;border-radius:6px;padding:4px 8px;margin:2px 0 4px;color:#ffd23f}
 .invpop .multibar button{margin:0}.invpop .multibar button[disabled]{opacity:.5}
+.invpop .trdesc{display:block;font-size:.75em;color:#c9c6e6;line-height:1.35;margin-top:3px;border-top:1px dashed #4d4080;padding-top:2px}.invpop .trdesc b{color:#7cf0a0;font-weight:400}

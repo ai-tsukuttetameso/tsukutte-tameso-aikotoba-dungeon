@@ -31,7 +31,7 @@ function hitMon(m, d, msg) { m.hp -= d; m.flash = 6; m.sleep = false; if (msg) s
 function killMon(m) {
   if (!G.mons.includes(m)) return;
   G.mons = G.mons.filter(o => o !== m); sfx('kill');
-  const ex = (m.exp || MON[m.t].exp) * (m.boss ? 5 : 1); say(`${m.name}を たおした！ ${ex}の けいけんち。`); if (jobHas('drain') && P.mp < P.mmp) { P.mp = Math.min(P.mmp, P.mp + 2); say('まりょくを すいとって MPが 2 もどった。'); } gainExp(ex); addJobExp(ex); noteKill(m.t);
+  const ex = Math.round((m.exp || MON[m.t].exp) * (m.boss ? 5 : 1) * (hasTrait('manabi') ? 1.2 : 1)); say(`${m.name}を たおした！ ${ex}の けいけんち。`); if (jobHas('drain') && P.mp < P.mmp) { P.mp = Math.min(P.mmp, P.mp + 2); say('まりょくを すいとって MPが 2 もどった。'); } gainExp(ex); addJobExp(ex); noteKill(m.t);
   if (m.loot) { const p = freeNear(m.x, m.y); if (p) { G.items.push(m.loot.gold ? { ...p, k: 'gold', amt: m.loot.gold } : { ...p, k: m.loot.o.k, o: m.loot.o }); say('ぬすまれた物を とりかえした！'); } }
   else if (m.elite) { const p = freeNear(m.x, m.y); if (p) { const kk = rnd() < .3 ? pick(ARMOR_POOL) : rnd() < .5 ? pick(GEM_POOL) : pick(G.pool); const o = kk === 'gold' ? undefined : newItem(kk, 'floor'); G.items.push({ ...p, k: kk, o, amt: ri(60, 150) * G.f }); say(`${m.name}は いいものを 落とした！`); } }
   else if (rnd() < .07) { const p = freeNear(m.x, m.y); if (p) { const kk = rnd() < .04 ? 'diamond' : pick(GEM_POOL); G.items.push({ ...p, k: kk, o: newItem(kk, 'floor') }); say(`${m.name}は ${ITEMS[kk].name}を 落とした！`); } }
@@ -41,7 +41,7 @@ function killMon(m) {
 }
 function attack(m, mul = 1, normal = false) {
   attackAnim(m);
-  let d = Math.max(1, Math.round(dmg(atkTotal(), m.def) * mul));
+  let d = Math.max(1, Math.round(dmg(atkTotal(), m.def) * mul * (hasTrait('gakeppuchi') && P.hp <= P.mhp * .3 ? 1.5 : 1)));
   const crit = normal && jobHas('crit') && rnd() < .2; if (crit) { d *= 2; shake(4); say('かいしんの いちげき！'); }
   if ((hasTrait('dekakiller') && m.t === 'dekakowa') || (hasTrait('robokiller') && m.t === 'robo')) d *= 2;
   sfx(crit || mul >= 2.5 ? 'crit' : 'hit'); if (hasTrait('kyuketsu')) P.hp = Math.min(P.mhp, P.hp + 1);
@@ -54,7 +54,7 @@ const expNext = () => P.lv * 10 - P.exp;
 function step() {
   const it = G.items.find(o => o.x === P.x && o.y === P.y);
   if (it) {
-    if (it.k === 'gold') { const amt = jobHas('merchant') ? Math.round(it.amt * 1.5) : it.amt; P.gold += amt; say(`${amt}ゴールド ひろった。`); sfx('pick'); G.items = G.items.filter(o => o !== it); }
+    if (it.k === 'gold') { const amt = Math.round(it.amt * (jobHas('merchant') ? 1.5 : 1) * (hasTrait('kinun') ? 1.3 : 1)); P.gold += amt; say(`${amt}ゴールド ひろった。`); sfx('pick'); G.items = G.items.filter(o => o !== it); }
     else {
       const o = it.o || newItem(it.k, 'floor');
       if (jobHas('alchemy') && ITEMS[o.k].cat === 'wand' && !o.alch) { o.alch = true; o.n = (o.n || 0) + 2; }
@@ -79,6 +79,7 @@ function trap(k) {
   if (k === 'spike') { const d = 5 + G.f; P.hp -= d; P.flash = 6; P.cause = n; shake(5); say(`${n}を ふんだ！ ${d}の ダメージ。`); }
   if (k === 'hole') { if (G.f < LAST) { fallSound(); enterFloor(G.f + 1); shake(10); say(`${n}だ！ ひゅ〜〜…… ドスン！ 地下${G.f}階に おちた。`); showBanner('ひゅ〜〜…… ドスン！', `おとし穴で 地下${G.f}階に おちた`); } else say(`${n}だ！ ……と思ったら、そこは浅かった。`); }
   if (k === 'heat') { P.food = Math.max(0, P.food - 20); say(`${n}を ふんだ！ あつすぎて、おなかが 20 へった。`); }
+  if ((k === 'ticket' || k === 'nisa') && hasTrait('saifu')) { say(`${n}を ふんだが、さいふのひもが かたくて お金は へらなかった。`); return; }
   if (k === 'ticket') { const g = Math.min(P.gold, 100); P.gold -= g; say(`${n}だ！ 自転車でもないのに 罰金 ${g}ゴールド。`); }
   if (k === 'nisa') { const g = Math.floor(P.gold / 2); P.gold -= g; say(`${n}だ！ つみたてに 回しすぎて、${g}ゴールド 消えた。`); }
   if (k === 'cat' && hasTrait('nekoyoke')) { say(`${n}を ふんだが、ねこよけで おどらずにすんだ。`); return; }
@@ -154,6 +155,8 @@ function endTurn() {
   if (P.turn % (hasTrait('haramochi') ? 12 : 6) === 0) { if (P.food > 0) P.food--; else { P.hp -= 1; P.cause = 'はらぺこ'; say('おなかが へって 動けない……。'); } }
   if (P.turn % 5 === 0 && P.food > 0) P.hp = Math.min(P.mhp, P.hp + 1);
   if (P.turn % 4 === 0 && P.food > 0) P.mp = Math.min(P.mmp, P.mp + 1);
+  if (hasTrait('saisei') && P.turn % 3 === 0 && P.food > 0) P.hp = Math.min(P.mhp, P.hp + 1);
+  if (hasTrait('maryoku') && P.turn % 5 === 0) P.mp = Math.min(P.mmp, P.mp + 1);
   if (jobHas('sage') && P.turn % 3 === 0) P.mp = Math.min(P.mmp, P.mp + 1);
   for (const m of [...G.mons]) { if (G.over) break; monTurn(m); if (MON[m.t].fast && G.mons.includes(m)) monTurn(m); }
   if (G.ft === 300) say('どこからか 地ひびきが する……。長く いすぎると あぶない。');
@@ -174,13 +177,17 @@ function monTurn(m) {
       if ((ax || ay) && isFloor(nx, ny) && !monAt(nx, ny) && !blockedAt(nx, ny) && !(nx === P.x && ny === P.y)) { const nd = Math.max(Math.abs(nx - P.x), Math.abs(ny - P.y)); if (nd > bd) { bd = nd; best = [nx, ny]; } } }
     if (best) [m.x, m.y] = best; return; }
   if (dist === 1) {
+    if (d.steal && P.gold > 0 && hasTrait('saifu')) { say(`${m.name}が お金を ねらったが、さいふのひもが かたくて ぬすめなかった。`); m.flee = true; return; }
     if (d.steal) { if (P.gold > 0) { const a = Math.min(P.gold, 30 + G.f * 20); P.gold -= a; m.loot = { gold: a }; say(`${m.name}に ${a}ゴールド ぬすまれた！`); }
       else { const c = P.inv.filter(o => !o.eq); if (!c.length) { say(`${m.name}は ぬすむ物が なくて がっかりしている。`); return; } const o = pick(c); P.inv.splice(P.inv.indexOf(o), 1); m.loot = { o }; say(`${m.name}に ${itemName(o)}を ぬすまれた！`); }
       m.flee = true; sfx('bad'); return; }
     if (d.dance) { if (rnd() < .5 && !hasTrait('nekoyoke')) { P.skip = 1; P.skipMsg = ''; say(`${m.name}が おどっている。つられて おどってしまった。`); } else say(`${m.name}は ずっと おどっている。`); return; }
     monAnim(m);
     if (jobHas('evade') && rnd() < (jobHas('nimble') ? .4 : .25)) { sfx('dodge'); say(`${m.name}の こうげき！ ……ひらりと よけた。`); if (jobHas('nimble')) { say('すかさず はんげき！'); attack(m, .6); } return; }
-    let dd = dmg(m.atk, defTotal()); if (eqPerk('guard')) dd = Math.max(1, dd - 1); if (jobHas('illusion')) dd = Math.max(1, Math.round(dd * .75)); P.hp -= dd; P.flash = 6; P.cause = m.name; sfx('hurt'); if (dd >= 8) shake(4);
+    if (hasTrait('mikawashi') && rnd() < .125) { sfx('dodge'); say(`${m.name}の こうげき！ ……みかわしで よけた。`); return; }
+    let dd = dmg(m.atk, defTotal()); if (eqPerk('guard')) dd = Math.max(1, dd - 1);
+    if (hasTrait('robomamori') && /^robo/.test(m.t)) dd = Math.max(1, Math.round(dd / 2));
+    if (hasTrait('dekamamori') && (/^dekakowa/.test(m.t) || m.boss)) dd = Math.max(1, Math.round(dd * .75)); if (jobHas('illusion')) dd = Math.max(1, Math.round(dd * .75)); P.hp -= dd; P.flash = 6; P.cause = m.name; sfx('hurt'); if (dd >= 8) shake(4);
     say(`${m.name}の こうげき！ ${dd}の ダメージ。`);
     if (hasTrait('hanekaeshi')) { const r = Math.ceil(dd / 2); hitMon(m, r, `はねかえし！ ${m.name}に ${r}の ダメージ。`); }
     return;

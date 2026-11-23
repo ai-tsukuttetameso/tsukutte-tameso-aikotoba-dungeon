@@ -4,7 +4,7 @@
 const KEYS = { ArrowUp: [0, -1], ArrowDown: [0, 1], ArrowLeft: [-1, 0], ArrowRight: [1, 0], w: [0, -1], s: [0, 1], a: [-1, 0], d: [1, 0], q: [-1, -1], e: [1, -1], z: [-1, 1], c: [1, 1], ' ': [0, 0] };
 let throwMode = false, invSel = 0;
 addEventListener('keydown', ev => {
-  if (!over.hidden) { if (ev.target && ev.target.tagName === 'INPUT') return; if (document.getElementById('startPick')) { if (ev.key === 'Escape') closeStartPick(); return; } if (ev.key === 'Enter') { ev.preventDefault(); newGame('random'); render(); } return; }
+  if (!over.hidden) { if (ev.target && ev.target.tagName === 'INPUT') return; if (document.getElementById('startPick')) { if (ev.key === 'Escape') closeStartPick(); return; } if (ev.key === 'Enter') { ev.preventDefault(); pickStart('random'); } return; }
   if (ev.key === 'Escape') { if (invpop.hidden && over.hidden && !throwMode) openQuit(); else invpop.hidden = true; throwMode = false; return; }
   if (!invpop.hidden && invpop.dataset.mode === 'inv') { const n = P.inv.length; const kk = ev.key.toLowerCase();
     if (ev.key === 'ArrowDown' || kk === 's') { invStep(1); ev.preventDefault(); return; }

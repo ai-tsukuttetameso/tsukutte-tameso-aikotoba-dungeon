@@ -1,19 +1,28 @@
 // アイテムを作る・名前と説明を出す
 'use strict';
 
+// 特性の 入れかえ用の 乱数（地図や 道具の 乱数とは べつ。階に 入るたびに 合言葉と 階から きめなおす）
+let trSeq = 1;
+function trRoll() { trSeq = hashSeed('tr:' + trSeq); return (trSeq % 100000) / 100000; }
+function trReset(f, v) { trSeq = hashSeed(runSeed + ':tr:' + f + ':' + v); }
+// 防具の 特性を、あとから ふやした 特性も ふくめた 全部の 中から えらびなおす（同じ 特性が かさなるときは そのまま）
+function widenTraits(o) { if (!ITEMS[o.k].equip || ITEMS[o.k].equip === 'atk' || !o.traits) return o;
+  const all = Object.keys(TRAITS).filter(x => TRAITS[x].slot === 'def');
+  o.traits = o.traits.map(t => { const n = all[Math.floor(trRoll() * all.length)]; return o.traits.includes(n) ? t : n; });
+  o.traits = [...new Set(o.traits)]; return o; }
 function shopItem(k, tier) { const o = newItem(k, 'shop'); if (!ITEMS[k].equip) return o;
-  const slot = ITEMS[k].equip, pool = Object.keys(TRAITS).filter(x => TRAITS[x].slot === (slot === 'atk' ? 'atk' : 'def'));
+  const slot = ITEMS[k].equip, pool = GEN_TRAITS[slot === 'atk' ? 'atk' : 'def'];
   o.plus = [0, 1, 3, 5][tier]; o.traits = [];
   const want = [0, 1, 2, 2][tier]; if (tier >= 2 && slot === 'atk') o.traits.push(pick(['honoo', 'koori']));
   while (o.traits.length < want) { const tr = pick(pool); if (!o.traits.includes(tr)) o.traits.push(tr); }
-  return o; }
+  return widenTraits(o); }
 function zap(o, effect) { if (o.n <= 0) return '杖を ふったが、もう 何も出なかった。'; o.n--; const r = ray(10); fx(r.path, '#e0a0ff'); sfx('zap'); if (!r.m) return '杖を ふった。光が とんでいったが、何にも 当たらなかった。'; r.m.sleep = false; effect(r.m); }
 let FAKE = {};
 function shuffleFake() { FAKE = {}; for (const cat of Object.keys(FAKE_NAMES)) { const names = [...FAKE_NAMES[cat]]; for (let i = names.length - 1; i > 0; i--) { const j = ri(0, i); [names[i], names[j]] = [names[j], names[i]]; }
   Object.keys(ITEMS).filter(k => ITEMS[k].cat === cat).forEach((k, i) => FAKE[k] = names[i]); } }
 const isKnown = k => !ITEMS[k].cat || P.known.has(k);
 function newItem(k, from) { const o = { k, plus: 0, traits: [] }; const it = ITEMS[k];
-  if (it.equip && rnd() < .45) o.traits.push(pick(Object.keys(TRAITS).filter(x => TRAITS[x].slot === (it.equip === 'atk' ? 'atk' : 'def'))));
+  if (it.equip && rnd() < .45) { o.traits.push(pick(GEN_TRAITS[it.equip === 'atk' ? 'atk' : 'def'])); widenTraits(o); }
   if (it.equip && from === 'floor' && rnd() < .15) o.cursed = true;
   if (it.cat === 'wand') o.n = ri(3, 6);
   if (k === 'arrow') o.n = ri(5, 10);
