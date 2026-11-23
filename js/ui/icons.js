@@ -1,0 +1,115 @@
+// 上のステータス表示に つける 小さなアイコン（ドット絵 → 画像に して <img> で使う）
+'use strict';
+
+const ICON_ART = {
+  key: { pal: { k: '#ffd23f' }, rows: [
+    '.kkk.....',
+    'k...k....',
+    'k...kkkkk',
+    'k...k.k.k',
+    '.kkk.....'] },
+  sun: { pal: { y: '#ffb347', c: '#ffe08a' }, rows: [
+    '....y....',
+    '.y.....y.',
+    '...ccc...',
+    '..ccccc..',
+    'y.ccccc.y',
+    '..ccccc..',
+    '...ccc...',
+    '.y.....y.',
+    '....y....'] },
+  stairs: { pal: { s: '#c8b89a', d: '#8a7a62' }, rows: [
+    '......sss',
+    '......d..',
+    '....sss..',
+    '....d....',
+    '..sss....',
+    '..d......',
+    'sss......',
+    'd........'] },
+  star: { pal: { y: '#ffd23f', w: '#fff3b0' }, rows: [
+    '....y....',
+    '...yyy...',
+    '...ywy...',
+    'yyyyyyyyy',
+    '.yyyyyyy.',
+    '..yyyyy..',
+    '..yy.yy..',
+    '.yy...yy.'] },
+  heart: { pal: { r: '#ff4d6d', h: '#ffb3c1' }, rows: [
+    '.rr...rr.',
+    'rhrr.rrrr',
+    'rhrrrrrrr',
+    'rrrrrrrrr',
+    '.rrrrrrr.',
+    '..rrrrr..',
+    '...rrr...',
+    '....r....'] },
+  drop: { pal: { b: '#3fa9ff', l: '#bfe6ff' }, rows: [
+    '....b....',
+    '...bbb...',
+    '..bbbbb..',
+    '.bbbbbbb.',
+    '.blbbbbb.',
+    '.blbbbbb.',
+    '..bbbbb..',
+    '...bbb...'] },
+  rice: { pal: { w: '#fbf7ee', n: '#2f5a3a' }, rows: [
+    '....w....',
+    '...www...',
+    '..wwwww..',
+    '.wwwwwww.',
+    'wwwwwwwww',
+    'wwnnnnnww',
+    'wwnnnnnww',
+    'wwnnnnnww'] },
+  coin: { pal: { o: '#c8901a', y: '#ffd23f', l: '#fff3b0' }, rows: [
+    '..ooooo..',
+    '.oyyyyyo.',
+    'oyllyyyyo',
+    'oylyoyyyo',
+    'oyyyoyyyo',
+    'oyyyoyyyo',
+    '.oyyyyyo.',
+    '..ooooo..'] },
+  sword: { pal: { s: '#dfe6f0', g: '#ffd23f', h: '#9a6a3a' }, rows: [
+    '......sss',
+    '.....sss.',
+    '....sss..',
+    'g..sss...',
+    '.gsss....',
+    '..gg.....',
+    '.h.g.....',
+    'h........'] },
+  shield: { pal: { r: '#ffd23f', d: '#4d6fd6' }, rows: [
+    'rrrrrrrrr',
+    'rdddrdddr',
+    'rdddrdddr',
+    'rrrrrrrrr',
+    'rdddrdddr',
+    '.rddrddr.',
+    '..rdrdr..',
+    '...rrr...'] },
+  armor: { pal: { a: '#9aa3b5', l: '#d6dbe6' }, rows: [
+    '.aa...aa.',
+    'aaaa.aaaa',
+    'alaaaaaaa',
+    '.laaaaaa.',
+    '.aaaaaaa.',
+    '.aaaaaaa.',
+    '.aaaaaaa.',
+    '..aaaaa..'] },
+  hourglass: { pal: { t: '#c89a5a', s: '#ffd23f', g: '#5a5070' }, rows: [
+    'ttttttt',
+    '.gsssg.',
+    '..gsg..',
+    '...s...',
+    '..gsg..',
+    '.gsssg.',
+    'ttttttt'] },
+};
+
+// 名前 → 画像のURL（最初に 1回だけ 作る）
+const ICON_URL = {};
+for (const [k, a] of Object.entries(ICON_ART)) ICON_URL[k] = sprite(a.rows, a.pal).toDataURL();
+const icon = (k, label) => `<img class="ic" src="${ICON_URL[k]}" alt="${label}" title="${label}">`;

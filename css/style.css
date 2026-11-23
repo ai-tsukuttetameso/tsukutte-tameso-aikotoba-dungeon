@@ -1,0 +1,176 @@
+/* 見た目 */
+:root{--bg:#0d0a14;--panel:#17122a;--fg:#f2ecdf;--mut:#a79fb8;--acc:#ffd23f;--bad:#ff6b6b;--good:#7cf0a0;--line:#3a2f5a;color-scheme:dark}
+*{box-sizing:border-box}[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:"DotGothic16","Hiragino Sans",monospace;-webkit-font-smoothing:none}
+.wrap{max-width:980px;margin:0 auto;padding-block:12px 24px;padding-left:max(12px,env(safe-area-inset-left,0px));padding-right:max(12px,env(safe-area-inset-right,0px));display:grid;gap:8px}
+.hud{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:18px;background:var(--panel);border:2px solid var(--line);border-radius:6px;padding:6px 12px}
+.hud span{display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
+.hud .ic{height:1.3em;width:auto;image-rendering:pixelated;flex:none}
+.hud b{color:var(--acc);font-weight:400}
+.hud .low{color:var(--bad)}
+.unk{color:#7cf0a0}
+.hud .nx{color:var(--mut);font-size:.8em}.hud b.mpv{color:#7ad8ff}
+.invpop .el{margin-left:6px;font-size:13px;border:1px solid currentColor;border-radius:3px;padding:0 3px}
+.hud .pinch{animation:blink .6s steps(2) infinite;background:#5a0a14;border-radius:4px;padding:0 4px}@keyframes blink{50%{opacity:.35}}
+.inv .eqtag{margin-left:6px;font-size:11px;color:var(--acc);border:1px solid var(--acc);border-radius:3px;padding:0 3px}
+.stage{position:relative;width:100%;aspect-ratio:17/11;background:#000;border:2px solid var(--line);border-radius:6px;overflow:hidden}
+canvas{touch-action:none;display:block;width:100%;height:100%;image-rendering:pixelated;image-rendering:crisp-edges}
+.log{background:linear-gradient(#24306e,#141a44);border:3px solid #e9e9ff;outline:2px solid #6a72b8;border-radius:6px;padding:8px 14px;min-height:92px;font-size:18px;line-height:1.45}
+.log div:nth-child(n+2){color:#c9c6e6}
+.row{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:start}
+.inv{background:var(--panel);border:2px solid var(--line);border-radius:6px;padding:6px 10px;font-size:16px;min-width:0}
+.inv h3{margin:0 0 4px;font-size:15px;color:var(--mut);font-weight:400}
+.inv button{font:inherit;color:var(--fg);background:#2a2246;border:1px solid #4d4080;border-radius:4px;padding:3px 8px;margin:2px 4px 2px 0;cursor:pointer}
+.inv button:hover{background:#3a2f66}
+.inv button.eq,.invpop button.eq{border-color:var(--acc);color:var(--acc)}
+.invpop{display:block}.invpop[hidden]{display:none}
+.pad{display:grid;grid-template-columns:repeat(3,56px);grid-template-rows:repeat(3,56px);gap:4px}
+.pad button{font:inherit;font-size:20px;color:var(--fg);background:#2a2246;border:2px solid #4d4080;border-radius:8px;touch-action:manipulation}
+.pad button:active{background:#4d4080}
+.help{color:var(--mut);font-size:14px}
+.over{position:absolute;inset:0;display:grid;place-items:safe center;overflow:auto;text-align:center;background:#000a;font-size:22px;padding:16px}
+.over.title{background:linear-gradient(#0000 0,#0000 45%,#000c 100%);display:flex;flex-direction:column;justify-content:space-between;align-items:center;place-items:initial}
+.over.title .ttl{margin-top:1%;background:radial-gradient(ellipse at center,#000a 0,#0000 70%);padding:0 24px}.over.title h1{font-size:clamp(20px,7.6vw,68px);color:#ffe27a;letter-spacing:.06em;white-space:nowrap;line-height:1.15;margin:4px 0 6px;
+  /* 太めの こい ふちどり ＋ 下に 赤い かげ（ドット文字でも 背景に まぎれないように） */
+  text-shadow:3px 0 #1a0610,-3px 0 #1a0610,0 3px #1a0610,0 -3px #1a0610,3px 3px #1a0610,-3px 3px #1a0610,3px -3px #1a0610,-3px -3px #1a0610,0 7px 0 #9a1838,0 9px 0 #1a0610}
+.over .tsub{font-size:clamp(13px,2vw,18px);color:#c9c6e6;letter-spacing:.2em}.over .tdesc{font-size:clamp(14px,2.2vw,20px);color:#f2ecdf;text-shadow:2px 2px 0 #000}
+.over .pwbox{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-top:8px}.over .pwbox input{font:inherit;font-size:16px;padding:6px 10px;border-radius:6px;border:2px solid #4d4080;background:#17122a;color:#f2ecdf;width:min(18em,80%);-webkit-user-select:text;user-select:text}.over .pwbox button{margin-top:0}
+.over .pwline{font-size:15px;color:#c9c6e6}.over .pwline b{color:#ffd23f}
+.over .tnote{color:#a79fb8;font-size:13px}.over .tsound{color:#ffd23f;font-size:13px;animation:blink 1.2s steps(2) infinite}
+.over.dead{background:radial-gradient(#3a000aee,#000e)}.over.dead h1{color:#ff5a5a}
+.over h1{font-size:clamp(26px,6vw,48px);margin:0 0 8px;color:var(--acc);font-weight:400;text-shadow:3px 3px 0 #7a1030}
+.over p{margin:4px 0}
+.over button{font:inherit;font-size:20px;margin-top:12px;padding:8px 20px;background:#e5484d;color:#fff;border:3px solid #fff;border-radius:6px;cursor:pointer}
+body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+.ctl{display:grid;grid-template-columns:1fr 1fr;gap:6px}.ctl .big{grid-column:1/3}.ctl .sub{white-space:nowrap;font-size:14px!important;padding:8px 4px!important}
+.invpop{z-index:4}
+.ctl .big{font:inherit;font-size:18px;color:#fff;background:#e5484d;border:2px solid #fff;border-radius:8px;padding:8px 10px;touch-action:manipulation}
+.ctl .big[disabled]{background:#3a2f5a;color:#8a82a8;border-color:#4d4080}
+.ctl .sub{font:inherit;font-size:16px;color:var(--fg);background:#2a2246;border:2px solid #4d4080;border-radius:8px;padding:8px 10px;touch-action:manipulation}
+.side{display:flex;gap:10px;align-items:start}
+.invpop{position:absolute;left:8px;right:8px;bottom:8px;max-height:calc(100% - 16px);overflow:auto;background:#17122aee;border:2px solid #e9e9ff;border-radius:8px;padding:8px;font-size:17px}
+.invpop button{font:inherit;color:var(--fg);background:#2a2246;border:1px solid #4d4080;border-radius:6px;padding:8px 10px;margin:3px;touch-action:manipulation}
+.stage .mmwrap{position:absolute;top:6px;right:6px;width:28%;cursor:pointer;touch-action:manipulation}
+.stage #mm{display:block;width:100%;height:auto;aspect-ratio:132/90;opacity:.85;border-radius:3px;image-rendering:pixelated}
+.stage .mmwrap.big{top:50%;left:50%;right:auto;width:92%;transform:translate(-50%,-50%);background:#000c;border:2px solid var(--line);z-index:2}
+.stage .mmwrap.big #mm{opacity:.95}
+.mmlabel{font-size:clamp(12px,1.5vw,16px);color:#f2ecdf;background:#000b;display:inline-block;padding:1px 8px;border-radius:4px;float:right;text-shadow:1px 1px 0 #000}
+.mmlabel.full{color:#ffd23f}
+.tags{position:absolute;inset:0;pointer-events:none}.tags .tag b{font-weight:normal}@media (max-width:700px){.tags .tag b{display:none}.tags .tag{font-size:10px!important;padding:0 2px!important}}
+.tags .tag{position:absolute;transform:translateX(-50%);white-space:nowrap;font-size:15px;color:#ffd23f;background:#000d;border:1px solid #ffd23f;border-radius:4px;padding:0 4px;line-height:1.3}
+.banner{position:absolute;left:0;right:0;top:38%;text-align:center;background:linear-gradient(90deg,#0000,#000d 15%,#000d 85%,#0000);padding:10px 8px;pointer-events:none;z-index:3}
+.banner .bt{font-size:clamp(22px,4.4vw,42px);color:#ff5a5a;text-shadow:3px 3px 0 #000,0 0 12px #ff3a3a88;letter-spacing:.05em}
+.banner .bs{font-size:clamp(14px,2.2vw,20px);color:#f2ecdf;margin-top:2px}
+.banner.pop{animation:bpop .35s ease-out}@keyframes bpop{from{transform:scale(1.4);opacity:0}to{transform:scale(1);opacity:1}}
+.inv .it{display:inline-flex;margin:2px 6px 2px 0}.inv .it button{margin:0}.inv .it .s{font-size:12px;padding:2px 5px;margin-left:1px;color:var(--mut)}
+.invpop .row1{display:flex;align-items:stretch;gap:3px;margin:3px 0}.invpop .row1 button{margin:0}.invpop .row1 button:first-child{flex:1;text-align:left}.invpop .row1 .s{font-size:14px;padding:4px 8px;color:var(--mut)}
+.invpop .lg{font-size:14px;border-bottom:1px solid #2a2246;padding:2px 0}
+.over .last{font-size:14px;color:#c9c6e6;text-align:left;max-width:34em;margin:8px auto;background:#0008;padding:6px 10px;border-radius:6px}
+.invpop .shopmsg{background:#ffd23f;color:#17122a;border-radius:6px;padding:6px 10px;margin-bottom:6px}
+.invpop .fuse{margin-top:4px}.invpop .tabs{display:flex;flex-wrap:wrap;gap:4px;margin:6px 0;border-bottom:2px solid #4d4080;padding-bottom:6px}.invpop .tabs button{margin:0}.invpop .tabs button.on{background:#ffd23f;color:#17122a;border-color:#ffd23f}.invpop .tabs button[data-close]{margin-left:auto}.invpop .payrow{display:flex;align-items:center;gap:6px;margin:2px 0}.invpop .payrow button{margin:0;padding:2px 8px}
+.invpop .pay{background:#3a1a2a;border:1px solid #ff6b6b;border-radius:6px;padding:4px 8px;margin-top:4px}.invpop .fh{color:#ffd23f}
+.invpop button.ng{opacity:.55}
+.invpop button.buy{text-align:left;min-width:46%}
+.over button.alt{background:#2a2246;border-color:#ffd23f;color:#ffd23f}
+.ctl .sub{padding:6px 10px}
+.skbar{display:flex;flex-wrap:wrap;gap:4px;align-items:center;background:var(--panel);border:2px solid var(--line);border-radius:6px;padding:4px 6px}
+.skbar .sklbl{font-size:13px;color:var(--mut)}.skbar .skmp{font-size:13px;color:#7ad8ff;margin-left:auto}
+.skbar button{font:inherit;font-size:14px;color:var(--fg);background:#2a2246;border:2px solid #4d4080;border-radius:6px;padding:4px 8px;touch-action:manipulation;line-height:1.1}
+.skbar button small{display:block;font-size:11px;color:#7ad8ff}.skbar button.ng{opacity:.45}
+.tip{color:var(--mut);font-size:13px;text-align:center}
+@media (min-width:900px){
+  .wrap{max-width:1400px;height:100dvh;padding-block:10px;grid-template-columns:minmax(0,1fr) 330px;grid-template-rows:auto minmax(0,1fr) auto;align-items:stretch}
+  .hud{grid-column:1;grid-row:1;font-size:16px}
+  .stagebox{grid-column:1;grid-row:2;min-height:0;display:flex;justify-content:center;align-items:center}
+  .stage{flex:none}
+  .log{grid-column:1;grid-row:3;min-height:0;font-size:16px}
+  .row{grid-column:2;grid-row:1/4;display:flex;flex-direction:column;gap:8px;min-height:0}
+  .inv{flex:1;min-height:0;overflow:auto}
+  .inv .it{display:flex;margin:3px 0}.inv .it button:first-child{flex:1;text-align:left}
+  .side{justify-content:center}
+  .tip{display:none}
+}
+.invpop .row1.sel button{border-color:#ffd23f}
+@media (max-width:640px){
+  html,body{overscroll-behavior:none}
+  .wrap{min-height:100dvh;padding-block:6px;gap:5px;grid-template-rows:auto auto auto 1fr}
+  .hud{font-size:13px;gap:2px 10px;padding:4px 8px}
+  .log{font-size:13px;min-height:0;padding:5px 10px;line-height:1.35}
+  .log div:nth-child(n+3){display:none}
+  .row{grid-template-columns:1fr}
+  .inv{display:none}
+  .side{justify-content:center}
+  .pad{grid-template-columns:repeat(3,62px);grid-template-rows:repeat(3,62px)}
+  .pad button{font-size:22px}
+  .stage .mmwrap{width:44%}
+  .over{font-size:15px;padding:10px}.over h1{font-size:26px}.over .last{font-size:12px;margin:4px auto}.over button{font-size:16px;margin-top:6px;padding:6px 12px}
+}
+.skbar:empty{display:none}
+.hud:empty{visibility:hidden}
+textarea.code{width:100%;font-family:monospace;font-size:13px;background:#17122a;color:#f2ecdf;border:1px solid #4d4080;border-radius:6px;padding:6px;word-break:break-all;resize:none}
+.hud .tre{color:#1a1020;background:#ffd23f;border-radius:4px;padding:0 4px;font-size:.75em}
+.over .pwbox select{font:inherit;font-size:16px;padding:6px 8px;border-radius:6px;border:2px solid #4d4080;background:#17122a;color:#f2ecdf}
+.over.recs{background:#000d}
+.over .recbox{max-width:32em;margin:10px auto;background:#0009;border:2px solid #ffd23f;border-radius:8px;padding:8px 12px;font-size:15px;text-align:left}
+.over .rechd{color:#ffd23f;margin-bottom:4px}.over .rechd b{color:#fff}
+.over .recbox textarea{width:100%;font:inherit;font-size:14px;background:#17122a;color:#f2ecdf;border:1px solid #4d4080;border-radius:6px;padding:6px;resize:none}
+.over .recbox button{font-size:15px;margin-top:6px;padding:6px 12px}
+.over .xlink{display:inline-block;margin-top:6px;color:#7ad8ff;font-size:15px}
+.over .recpage{max-width:34em;width:100%}.over .recgrp{text-align:left;background:#0009;border:1px solid #4d4080;border-radius:8px;padding:6px 10px;margin:8px 0;font-size:15px}
+.over .recrow{display:grid;grid-template-columns:3em 6em 3.5em 1fr auto;gap:6px;align-items:baseline;border-top:1px dashed #3a2f5a;padding:2px 0}.over .recrow b{color:#ffd23f;font-weight:400}.over .recrow small{color:#a79fb8}
+.invpop .bagbox{border:1px solid var(--line);border-radius:6px;padding:4px 6px;margin:6px 0}.invpop .baghd{color:var(--acc);margin-bottom:2px}
+.invpop .tabs.sub button{font-size:.9em}
+/* タイトル：やりこみの まとめ・職業えらび */
+.over .prog{display:flex;flex-wrap:wrap;justify-content:center;gap:4px 10px;font-size:clamp(12px,1.7vw,15px);color:#c9c6e6;margin-top:4px}
+.over .prog span{background:#0009;border:1px solid #4d4080;border-radius:4px;padding:1px 8px}.over .prog b{color:#ffd23f;font-weight:400}
+.over .jobsel{display:flex;flex-direction:column;gap:4px;align-items:center;margin:4px 0}
+.over .jobrow{display:flex;gap:4px;justify-content:center;flex-wrap:wrap}
+.over button.job{position:relative;margin:0;padding:2px 4px 1px;width:4.6em;font-size:11px;background:#17122acc;border:2px solid #4d4080;color:#f2ecdf;border-radius:6px;display:flex;flex-direction:column;align-items:center;gap:0;line-height:1.2}
+.over button.job img{width:36px;height:34px;image-rendering:pixelated}
+.over button.job.up{border-color:#7a5a20}.over button.job.on{border-color:#ffd23f;background:#3a2f66;box-shadow:0 0 0 2px #ffd23f55}
+.over button.job.lock{opacity:.7;color:#7a7490}.over button.job i{position:absolute;top:0;right:3px;color:#ffd23f;font-style:normal;font-size:12px}
+.over .jobdesc{font-size:13px;color:#f2ecdf;max-width:36em;margin:2px auto 0;min-height:2.6em;background:#0009;border-radius:6px;padding:3px 8px}.over .jobdesc b{color:#ffd23f;font-weight:400}.over .jobdesc small{color:#a79fb8}
+.over .jobline{font-size:15px;color:#ffd23f}
+@media (max-width:640px){.over button.job{width:3.9em;font-size:10px}.over button.job img{width:28px;height:26px}.over .jobdesc{font-size:12px}}
+.over .tdesc span{display:inline-block}
+.over .jobsel{background:#0b0818d9;border:1px solid #4d4080;border-radius:8px;padding:4px 6px}
+.over button.job span{white-space:nowrap;letter-spacing:-.04em}
+@media (max-width:640px){.over button.job{width:62px;font-size:9.5px}}
+.over .jobsel{align-self:center;width:max-content;max-width:100%;margin:4px auto;background:#0b0818b3}
+.over button.job{width:74px;font-size:12px}
+@media (max-width:640px){.over button.job{width:62px;font-size:9px;padding:2px 1px 1px}}
+/* そうびバッグ（もちものに 数えない） */
+.eqhd{width:100%;font-size:12px;color:#ffd23f;border-top:1px dashed #4d4080;margin-top:4px;padding-top:2px}
+/* きわめた 職業から ひきついだ わざ */
+.skbar button.inh{border-style:dashed}.inhtag{color:#7ad8ff;font-weight:400}
+.over .bankline{font-size:15px;color:#7ad8ff}
+.over .herorow{grid-template-columns:2em minmax(6em,auto) 1fr}
+/* タイトルの ボタンを 小さめに まとめる（合言葉の 行まで 1画面に おさめる） */
+.over.title .tbot > button{font-size:16px;padding:6px 14px;margin-top:6px}
+.over.title .tbot > button#go{font-size:18px}
+.over.title .pwbox{margin-top:6px}.over.title .pwbox input,.over.title .pwbox select{font-size:14px;padding:5px 8px}.over.title .pwbox button{font-size:15px;padding:5px 12px;margin-top:0}
+/* クリアの記録の 一覧から シェア */
+.over .recrow{grid-template-columns:3em 6em 3.5em 1fr auto auto}
+.over .recrow button.recsh{margin:0;font-size:13px;padding:2px 10px;background:#2a2246;border:2px solid #7ad8ff;color:#7ad8ff;border-radius:6px}
+.over .recshbox .recbox{margin:4px 0 8px}
+@media (max-width:640px){.over .recrow{grid-template-columns:2.6em 5em 3em 1fr auto;font-size:13px}.over .recrow small{display:none}}
+/* お店：いまの そうびに ない 特性 */
+.newtr{color:#7cf0a0;font-weight:400;text-decoration:underline dotted}
+/* わざの なかま分け */
+.sktabs{display:inline-flex;flex-wrap:wrap;gap:3px;margin-right:4px}.sktabs.pop{display:flex;margin:6px 0}
+.sktabs button{font:inherit;font-size:12px;color:var(--mut);background:transparent;border:1px solid #4d4080;border-radius:12px;padding:2px 8px;line-height:1.2}
+.sktabs button.on{color:#14101f;background:#ffd23f;border-color:#ffd23f}
+.skbar .sktabs button small{display:none}.sknone{font-size:12px;color:var(--mut)}
+.skrow{display:flex;gap:4px;align-items:stretch}.skrow>button:first-child{flex:1;min-width:0}
+.skrow button.fav{flex:0 0 auto;width:40px;font-size:18px;color:#ffd23f}.skrow button.fav:not(.on){color:var(--mut)}
+/* はじめる 階を えらぶ */
+.startpick{position:fixed;inset:0;background:rgba(10,8,20,.82);display:flex;align-items:center;justify-content:center;z-index:5;padding-inline:16px}
+.startpick .spbox{background:var(--panel);border:2px solid var(--acc);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:8px;max-width:360px;width:100%}
+.startpick h2{margin:0;color:#ffd23f;font-size:20px}.startpick button{margin:0}.startpick button.on{border-color:#ffd23f;color:#ffd23f}
+.over .pwhint{margin:4px 0 0;font-size:13px;color:#7cf0a0;min-height:1em}
+/* タイトルの あいだは もちもの・わざ・ボタンを かくす */
+.wrap.titlemode .row,.wrap.titlemode .tip,.wrap.titlemode .log{display:none}
+@media (min-width:900px){.wrap.titlemode{grid-template-columns:minmax(0,1fr)}}
+/* 記録コード */
+.over .bktxt{width:100%;box-sizing:border-box;min-height:5.5em;font:12px/1.4 monospace;background:#17122a;color:#f2ecdf;border:2px solid #4d4080;border-radius:6px;padding:6px;word-break:break-all;margin-top:6px}
+.over .backup button{font-size:15px}

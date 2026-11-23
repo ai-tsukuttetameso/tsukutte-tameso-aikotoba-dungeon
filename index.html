@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>あいことばダンジョン</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DotGothic16&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body><div class="wrap">
+<div class="hud" id="hud"></div>
+<div class="stagebox"><div class="stage"><canvas id="cv" width="272" height="176"></canvas><div class="mmwrap" id="mmw"><canvas id="mm" width="132" height="90" title="地図（タップで大きく）"></canvas><div class="mmlabel" id="mmlabel"></div></div><div class="banner" id="banner" hidden></div><div class="tags" id="tags"></div><div class="invpop" id="invpop" hidden></div><div class="over" id="over"></div></div></div>
+<div class="log" id="log"></div>
+<div class="row">
+  <div class="inv"><h3>もちもの（Iキーで一覧／番号キーかクリックで使う。10番目以降は 0・-・^ キー。けん・たては そうび／はずす。「なげ」で投げる、「おく」で足もとに おく）</h3><div id="inv"></div><p class="help">矢印・WASDで移動／Q E Z Cでななめ／Shift＋方向でダッシュ／スペースで足ぶみ。敵に向かって進むと攻撃。階段に乗ってEnterで下りる。Tのあと番号で投げる。Fで 向いている方向に こうげき（やり・つえ・むち・ブーメランは 遠くまで とどく）。Mで わざ一覧、Shift＋数字で わざを すぐ使う。</p></div>
+  <div class="skbar" id="skbar"></div>
+  <div class="side"><div class="pad" id="pad"></div>
+    <div class="ctl"><button class="big" id="downBtn" disabled>階段を<br>おりる</button><button class="sub" id="atkBtn">こうげき</button><button class="sub" id="invBtn">もちもの</button><button class="sub" id="skillBtn">わざ</button><button class="sub" id="waitBtn">足ぶみ</button><button class="sub" id="logBtn">ログ</button><button class="sub" id="saveBtn">セーブ</button><button class="sub" id="quitBtn">やめる</button><button class="sub" id="sndBtn">音 ぜんぶ</button></div></div>
+</div>
+<p class="tip">スマホは、画面の行きたい方向をタップしても動けます。押しっぱなしでダッシュ。右上の小さい地図をタップすると大きくなります</p>
+</div>
+<!-- 読みこむ順番に 意味があります（あとのファイルは 前のファイルの定義を使う）。main.js は いつも最後 -->
+<script src="js/core/migrate.js"></script>
+<script src="js/core/rng.js"></script>
+<script src="js/core/util.js"></script>
+<script src="js/gfx/sprites.js"></script>
+<script src="js/gfx/sprites_deep.js"></script>
+<script src="js/gfx/sprites_jobs.js"></script>
+<script src="js/gfx/sprites_armor.js"></script>
+<script src="js/gfx/sprites_food.js"></script>
+<script src="js/gfx/sprites_weapons.js"></script>
+<script src="js/gfx/smooth.js"></script>
+<script src="js/data/monsters.js"></script>
+<script src="js/data/items.js"></script>
+<script src="js/data/shop.js"></script>
+<script src="js/data/jobs.js"></script>
+<script src="js/game/state.js"></script>
+<script src="js/game/items.js"></script>
+<script src="js/world/dungeon.js"></script>
+<script src="js/game/save.js"></script>
+<script src="js/world/map.js"></script>
+<script src="js/game/friends.js"></script>
+<script src="js/game/run.js"></script>
+<script src="js/game/actions.js"></script>
+<script src="js/game/weapons.js"></script>
+<script src="js/game/skills.js"></script>
+<script src="js/game/jobs.js"></script>
+<script src="js/game/progress.js"></script>
+<script src="js/game/hero.js"></script>
+<script src="js/game/backup.js"></script>
+<script src="js/audio/sfx.js"></script>
+<script src="js/audio/sounds.js"></script>
+<script src="js/audio/bgm.js"></script>
+<script src="js/gfx/render.js"></script>
+<script src="js/gfx/title.js"></script>
+<script src="js/gfx/minimap.js"></script>
+<script src="js/ui/icons.js"></script>
+<script src="js/ui/hud.js"></script>
+<script src="js/ui/skillbar.js"></script>
+<script src="js/ui/records.js"></script>
+<script src="js/ui/screens.js"></script>
+<script src="js/ui/start.js"></script>
+<script src="js/ui/jobs.js"></script>
+<script src="js/ui/hero.js"></script>
+<script src="js/ui/save.js"></script>
+<script src="js/ui/input.js"></script>
+<script src="js/ui/inventory.js"></script>
+<script src="js/ui/bag.js"></script>
+<script src="js/ui/shop.js"></script>
+<script src="js/main.js"></script>
+</body></html>
