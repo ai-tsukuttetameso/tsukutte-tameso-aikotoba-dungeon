@@ -7,8 +7,9 @@ addEventListener('keydown', ev => {
   if (!over.hidden) { if (ev.target && ev.target.tagName === 'INPUT') return; if (document.getElementById('startPick')) { if (ev.key === 'Escape') closeStartPick(); return; } if (ev.key === 'Enter') { ev.preventDefault(); newGame('random'); render(); } return; }
   if (ev.key === 'Escape') { if (invpop.hidden && over.hidden && !throwMode) openQuit(); else invpop.hidden = true; throwMode = false; return; }
   if (!invpop.hidden && invpop.dataset.mode === 'inv') { const n = P.inv.length; const kk = ev.key.toLowerCase();
-    if (ev.key === 'ArrowDown' || kk === 's') { invSel = Math.min(n - 1, invSel + 1); drawInvPop(); ev.preventDefault(); return; }
-    if (ev.key === 'ArrowUp' || kk === 'w') { invSel = Math.max(0, invSel - 1); drawInvPop(); ev.preventDefault(); return; }
+    if (ev.key === 'ArrowDown' || kk === 's') { invStep(1); ev.preventDefault(); return; }
+    if (ev.key === 'ArrowUp' || kk === 'w') { invStep(-1); ev.preventDefault(); return; }
+    if (ev.key === 'ArrowLeft' || ev.key === 'ArrowRight' || kk === 'a' || kk === 'd') { setInvTab(invTab === 'eq' ? 'bag' : 'eq'); ev.preventDefault(); return; }
     if (ev.key === 'Enter') { ev.preventDefault(); invpop.hidden = true; useItem(invSel); return; }
     if (kk === 't') { invpop.hidden = true; throwItem(invSel); return; }
     if (kk === 'x') { invpop.hidden = true; dropItem(invSel); return; }

@@ -2,9 +2,20 @@
 'use strict';
 
 const SORT_ORDER = ['dou_ken', 'sword', 'hagane_ken', 'honoo_ken', 'koori_ken', 'ikazuchi_ken', 'hikari_ken', 'yari', 'hagane_yari', 'honoo_yari', 'ryuu_yari', 'tsue', 'rune_tsue', 'honoo_tsue', 'kenja_tsue', 'muchi', 'ibara_muchi', 'kusari_muchi', 'boomerang', 'hagane_boom', 'hoshi_boom', 'shield', 'hoshi_tate', 'kawa_boushi', 'tetsu_kabuto', 'mahou_boushi', 'ryuu_kabuto', 'kawa_kote', 'tetsu_kote', 'kawa_kutsu', 'hayate_kutsu', 'arrow', 'bread', 'onigiri', 'nori_ben', 'karaage_ben', 'shake_ben', 'curry_ben', 'maku_ben', 'toku_ben', 'kin_tamago', 'ruby', 'sapphire', 'emerald', 'diamond', 'kinkai', 'herb', 'sticker', 'charm', 'grass', 'scroll', 'wand', 'bag', 'omamori'];
-function sortInv() { const rank = o => { const it = ITEMS[o.k]; const g = SORT_ORDER.indexOf(it.cat || o.k); return (g < 0 ? 99 : g) * 100 + (o.eq ? 5000 : 0) - (o.plus || 0); };
-  P.inv.sort((a, b) => rank(a) - rank(b) || (isKnown(a.k) ? ITEMS[a.k].name : FAKE[a.k]).localeCompare(isKnown(b.k) ? ITEMS[b.k].name : FAKE[b.k], 'ja'));
-  say('もちものを ならべかえた。'); render(); if (!invpop.hidden && invpop.dataset.mode === 'inv') drawInvPop(); }
+// ならべかえの しかた（えらんだものは ブラウザに おぼえておく）
+const SORT_MODES = [['kind', '武器が上'], ['tool', '道具が上'], ['name', 'あいうえお'], ['plus', '強い順']];
+function getSortMode() { try { const v = localStorage.getItem('aikotoba_sortby'); return SORT_MODES.some(m => m[0] === v) ? v : 'kind'; } catch (e) { return 'kind'; } }
+function setSortMode(v) { try { localStorage.setItem('aikotoba_sortby', v); } catch (e) {} }
+function sortInv() { const mode = getSortMode(), shown = o => isKnown(o.k) ? ITEMS[o.k].name : FAKE[o.k];
+  const group = o => { const g = SORT_ORDER.indexOf(ITEMS[o.k].cat || o.k); return g < 0 ? 99 : g; };
+  // 道具が上：そうびできる物を うしろへ
+  const kindRank = o => mode === 'tool' && ITEMS[o.k].equip ? group(o) + 200 : group(o);
+  const key = (a, b) => mode === 'name' ? shown(a).localeCompare(shown(b), 'ja') || (b.plus || 0) - (a.plus || 0)
+    : mode === 'plus' ? (b.plus || 0) - (a.plus || 0) || kindRank(a) - kindRank(b) || shown(a).localeCompare(shown(b), 'ja')
+    : kindRank(a) - kindRank(b) || (b.plus || 0) - (a.plus || 0) || shown(a).localeCompare(shown(b), 'ja');
+  // そうび中の物は いつも うしろ（そうびバッグ）
+  P.inv.sort((a, b) => (a.eq ? 1 : 0) - (b.eq ? 1 : 0) || key(a, b));
+  say(`もちものを ならべかえた（${SORT_MODES.find(m => m[0] === mode)[1]}）。`); render(); if (!invpop.hidden && invpop.dataset.mode === 'inv') drawInvPop(); }
 const _htmlCache = {};
 // 中身が かわった ときだけ 書きかえる（ボタンが 押している途中で 消えないように）
 function setHtml(id, html) { if (_htmlCache[id] === html) return; _htmlCache[id] = html; document.getElementById(id).innerHTML = html; }

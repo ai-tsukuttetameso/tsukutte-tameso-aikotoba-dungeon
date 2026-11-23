@@ -23,6 +23,8 @@ function fitView() {
   st.style.aspectRatio = VW + '/' + VH;
   if (innerWidth >= 900) { const r = box.getBoundingClientRect(); width = Math.floor(Math.min(r.width, r.height * VW / VH)) + 'px'; }
   st.style.width = width;
+  // スマホの もちもの一覧が 下の ボタンに かぶらないよう、ボタンの 高さを CSS に わたす
+  if (narrow) { const row = document.querySelector('.row'); if (row && row.offsetParent !== null) document.documentElement.style.setProperty('--ctlh', Math.ceil(row.getBoundingClientRect().height + 8) + 'px'); }
 }
 addEventListener('resize', () => { fitView(); render(); }); fitView();
 // わざの 数や ログの 行が かわって 高さが かわったら、地図の 大きさを あわせなおす
