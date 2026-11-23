@@ -26,12 +26,13 @@ function drawShop(msg) {
   const unpaid = P.inv.filter(o => o.unpaid), total = unpaid.reduce((s, o) => s + o.unpaid, 0);
   const cursed = P.inv.some(o => o.cursed && o.eq);
   const unk = P.inv.map((o, i) => [o, i]).filter(([o]) => !isKnown(o.k));
-  const tabs = [['buy', 'かう'], ['sell', 'うる'], ['fuse', '合成'], ['slot', 'わくを ふやす'], ['ident', 'みてもらう'], ...(cursed ? [['purify', 'おはらい']] : [])];
+  const tabs = [['buy', 'かう'], ['sell', 'うる'], ['fuse', '合成'], ['slot', 'わくを ふやす'], ['ident', 'みてもらう'], ...(fuseList().some(e => evoReady(e.o)) ? [['evo', 'しんか']] : []), ...(cursed ? [['purify', 'おはらい']] : [])];
   if (!tabs.some(([k]) => k === shopTab)) shopTab = 'buy';
   let body = '';
   if (shopTab === 'buy') body = `<div class="help" style="margin-top:4px">${['ふつうの 品ぞろえ', '少し レアな 品ぞろえ', 'レアもの あり', '深い階の 品ぞろえ（レアもの たくさん）'][G.shopTier] || ''}。お店の ゆかに ならんでいる物も、ひろって ここで はらえます</div>` + (G.stock.length ? G.stock.map((s, j) => `<button data-buy="${j}" class="buy">${ITEMS[s.o.k].name}${s.o.plus ? '+' + s.o.plus : ''}　<b style="color:#ffd23f">${buyPrice(s)}G</b>　<small>${s.inf ? 'いくつでも' : 'のこり1'}</small><br><small style="color:#a79fb8">${ITEMS[s.o.k].equip ? descNewTraits(s.o) : ITEMS[s.o.k].desc}</small></button>`).join('') : '<span class="help">うりきれ</span>');
   if (shopTab === 'fuse') body = fuseHtml();
   if (shopTab === 'slot') body = slotHtml();
+  if (shopTab === 'evo') body = evoHtml();
   if (shopTab === 'sell') { const list = P.inv.map((o, i) => [o, i]).filter(([o]) => !o.unpaid && !(o.eq && o.cursed));
     body = `<div class="help" style="margin-top:4px">うると、ねだんの 半分くらいで 買いとってもらえます（AI価格で かわります）</div>`
       + `<div class="tabs sub"><button data-sellmode="inv"${sellMode === 'inv' ? ' class="on"' : ''}>もちものを うる</button><button data-sellmode="bag"${sellMode === 'bag' ? ' class="on"' : ''}>袋の中身を うる</button></div>`;
@@ -77,6 +78,12 @@ function fuseHtml() {
   return h + `<button data-fusecancel="1">えらびなおす</button></div>`;
 }
 // わくを ふやす：装備を 1つ えらんで、特性の わくを ＋1（もちもの・袋の 中・そうび中 どれでも）
+// しんか：＋100の そうびを えらんだ 先に かえる
+function evoHtml() { const c = evoCost(), list = fuseList().map((e, i) => [e, i]).filter(([e]) => evoReady(e.o));
+  let h = `<div class="fuse"><div class="help">＋${EVO_NEED}まで きたえた そうびを、上の そうびに しんか させます（${c}G）。＋は ${EVO_NEED} へって のこり、特性は そのまま、特性の わくが 1つ ふえます。しんか先は えらべます。</div>`;
+  if (!list.length) return h + `<div class="help" style="color:#ff9a9a">＋${EVO_NEED}の そうびが ありません。</div></div>`;
+  return h + list.map(([e, i]) => `<div class="evogrp"><div>${fuseLabel(e)}</div>` + evoChoices(e.o).map(k => { const it = ITEMS[k], ok = P.gold >= c && !e.o.unpaid;
+    return `<button data-evo="${i}:${k}"${ok ? '' : ' class="ng"'}>→ <img class="evoimg" src="${colImg(it.spr)}" alt=""><b>${it.name}</b>　${it.desc}<br><small style="color:#a79fb8">${it.note}${it.evoTrait ? '・特性「' + TRAITS[it.evoTrait].name + '」' : ''}　${c}G${P.gold < c ? '・ゴールドが たりない' : ''}</small></button>`; }).join('') + '</div>').join('') + '</div>'; }
 function slotHtml() { const eqs = fuseList();
   let h = `<div class="fuse"><div class="help">装備の 特性の わくを 1つ ふやします（ふつう ${TRAIT_SLOT_BASE}つ → 最大 ${TRAIT_SLOT_MAX}つ）。わくが ふえると、合成で 特性を たくさん もてます。${jobHas('forge') ? 'かじやなので 半額。' : ''}</div>`;
   if (!eqs.length) return h + '<div class="help" style="color:#ff9a9a">装備を もっていません。</div></div>';
@@ -114,6 +121,9 @@ function shopClick(b) {
     if (traitCap(o) >= TRAIT_SLOT_MAX) return drawShop(`${itemName(o)}の わくは もう ${TRAIT_SLOT_MAX}つ。これ以上 ふやせない。`);
     if (o.unpaid) return drawShop('お金を はらってから たのんでください。'); if (P.gold < c) return drawShop(`${c}G ひつよう。ゴールドが たりない。（いま ${P.gold}G）`);
     P.gold -= c; sfx('forge'); const m = addTraitSlot(o, 'AIかじや'); say(m); drawShop(`${m}（${c}G）`); render(); return; }
+  if (b.dataset.evo) { const [i, k] = b.dataset.evo.split(':'), e = fuseList()[+i]; if (!e || !evoReady(e.o) || !evoChoices(e.o).includes(k)) return drawShop(); const c = evoCost();
+    if (e.o.unpaid) return drawShop('お金を はらってから たのんでください。'); if (P.gold < c) return drawShop(`${c}G ひつよう。ゴールドが たりない。（いま ${P.gold}G）`);
+    P.gold -= c; sfx('forge'); shake(4); const m = evolveItem(e.o, k); say(m); if (!fuseList().some(x => evoReady(x.o))) shopTab = 'buy'; drawShop(`${m}（${c}G）`); render(); return; }
   if (b.dataset.fusecancel) { fuseObj = null; return drawShop(); }
   if (b.dataset.pay) { const unpaid = P.inv.filter(o => o.unpaid), total = unpaid.reduce((s, o) => s + o.unpaid, 0);
     if (P.gold < total) return drawShop('ゴールドが たりない。いらない物は ゆかに おいて もどせます。');

@@ -32,6 +32,9 @@ const JOB_LOOK = {
   genjutsu: { hat: 'point', hold: 'staff', robe: true, pal: { r: '#0a3a4a', R: '#1a9aa8', W: '#a0f0ff', b: '#1a2a5a', B: '#3a5ac8', Y: '#ff6ad0', Q: '#ff6ad0' } },
   renkin: { hat: 'hood', hold: 'bag', robe: true, pal: { r: '#5a4a10', R: '#a08a30', W: '#f0e080', b: '#3a3a20', B: '#7a7a40', Y: '#ffd23f', K: '#f0c040' } },
   akindo: { hat: 'cap', hold: 'bag', pal: { r: '#8a1c2a', R: '#d8343f', W: '#ff8a7a', w: '#f0c040', b: '#1a5a3a', B: '#2aa86a', Y: '#ffd23f', K: '#f0c040' } },
+  yuusha: { hat: 'helm', hold: 'sword', pal: { w: '#1a3a8a', R: '#3a7ae0', W: '#a0d0ff', b: '#1a3a8a', B: '#3a7ae0', Y: '#ffd23f', X: '#fff4a0', L: '#ffd23f' } },
+  daikenja: { hat: 'point', hold: 'staff', robe: true, pal: { r: '#c09a20', R: '#ffe070', W: '#fffbe0', b: '#c09a20', B: '#fff4c0', Y: '#ff5a5a', O: '#ffd23f', Q: '#ffffff' } },
+  kagenoou: { hat: 'hood', hold: 'dagger', pal: { r: '#1a0a2a', R: '#3a1a5a', W: '#8a5ad8', b: '#1a0a2a', B: '#3a1a5a', Y: '#c08aff', m: '#3a1a5a', h: '#8a5ad8', L: '#3a1a5a', F: '#1a0a2a' } },
   bmaster: { hat: 'helm', hold: 'hammer', pal: { w: '#8a6010', R: '#f0c040', W: '#fff4a0', b: '#5a5a68', B: '#a0a0b0', Y: '#e5484d', X: '#e0e8ff' } },
 };
 function jobHeroRows(look) { const rows = HERO_ROWS.map(r => [...r]);

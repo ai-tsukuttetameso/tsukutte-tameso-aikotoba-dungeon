@@ -2,7 +2,7 @@
 'use strict';
 
 function genFloor(f) { const saved = seed; P.visits[f] = (P.visits[f] || 0) + 1; seed = hashSeed(runSeed + ':' + f + ':' + P.visits[f]); rnd(); rnd(); trReset(f, P.visits[f]);
-  try { return genFloorInner(f); } finally { seed = saved; } }
+  try { return decorateFloor(genFloorInner(f)); } finally { seed = saved; } }
 function genFloorInner(f) {
   const map = Array.from({ length: H }, () => Array(W).fill(0));
   const rooms = [];
@@ -79,6 +79,9 @@ const roomOf2 = (r, x, y) => x >= r.x && x < r.x + r.w && y >= r.y && y < r.y + 
 // つよい こたい（強個体）：だいたい 15ぴきに 1ぴき。色ちがいで 光る。HP2倍・こうげき1.35倍・けいけんち3倍・かならず 何か 落とす
 // （乱数の 並びを かえないよう、合言葉と 場所から きめる）
 const ELITE_RATE = 7;
-function addMon(g, t, x, y, boss) { const d = MON[t]; const sc = monScale(g.f), lh = sc.hp, la = sc.atk;
+function addMon(g, t, x, y, boss) { if (!boss && t !== 'keeper') t = secretMon(widenMon(t, g.f, x, y), g.f, x, y); const d = MON[t]; const sc = monScale(g.f), lh = sc.hp, la = sc.atk;
   const elite = !boss && t !== 'keeper' && g.f >= 2 && hashSeed(runSeed + ':' + g.f + ':' + x + ':' + y + ':' + t) % 100 < ELITE_RATE, em = elite ? 2 : 1;
-  const hp = Math.round(d.hp * lh * (boss ? 1.3 : 1) * em); g.mons.push({ t, x, y, hp, mhp: hp, atk: Math.round(d.atk * la * (boss ? .8 : 1) * (elite ? 1.35 : 1)), def: d.def + (boss ? 2 : 0) + (elite ? 1 : 0), boss, elite, exp: Math.round(d.exp * sc.exp * (elite ? 3 : 1)), stuck: 0, flash: 0, name: boss ? 'でかこわの王' : (elite ? 'つよい' : '') + d.name }); }
+  const hp = Math.round(d.hp * lh * (boss ? 1.3 : 1) * em); g.mons.push({ t, x, y, hp, mhp: hp, atk: Math.round(d.atk * la * (boss ? .8 : 1) * (elite ? 1.35 : 1)), def: d.def + (boss ? 2 : 0) + (elite ? 1 : 0), boss, elite, exp: Math.round(d.exp * sc.exp * (elite ? 3 : 1)), stuck: 0, flash: 0, name: boss ? 'でかこわの王' : (elite ? 'つよい' : '') + d.name });
+  // つわものの階：敵が 強い かわりに けいけんち 2倍
+  if (!boss && ruleOf(g.f) === 'strong') { const m = g.mons[g.mons.length - 1]; m.hp = m.mhp = Math.round(m.hp * 1.5); m.atk = Math.round(m.atk * 1.25); m.exp *= 2; }
+  applyDiff(g.mons[g.mons.length - 1]); }

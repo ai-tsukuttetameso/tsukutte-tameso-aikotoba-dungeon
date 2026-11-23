@@ -24,7 +24,7 @@ function drawHud() {
   const low = P.hp <= P.mhp * .3, hungry = P.food <= 15;
   const hud = [
     runMode === 'daily' ? `<span>${icon('sun', '今日のダンジョン')}<b>今日のダンジョン</b></span>` : `<span>${icon('key', '合言葉')}合言葉 <b>${escH(password)}</b>${treasure ? ' <small class="tre">おたから</small>' : ''}</span>`,
-    `<span>${icon('stairs', '階')}地下<b>${G.f}</b>/${LAST}階</span>`,
+    `<span>${icon('stairs', '階')}地下<b>${G.f}</b>/${LAST}階${curRule() ? ` <small class="rule">${RULES[curRule()].short}</small>` : isMidFloor(G.f) && midBossAlive() ? ' <small class="rule mid">ぬし</small>' : ''}${diffTag(runDiff) ? ` <small class="rule ura">${diffTag(runDiff)}</small>` : ''}</span>`,
     `<span>${icon('star', 'レベル')}Lv <b>${P.lv}</b> <small class="nx">つぎまで ${expNext()}</small></span>`,
     `<span class="${P.pinch ? 'low pinch' : low ? 'low' : ''}">${icon('heart', 'HP')}HP <b>${Math.max(0, P.hp)}</b>/${P.mhp}</span>`,
     `<span>${icon('drop', 'MP')}MP <b class="mpv">${P.mp}</b>/${P.mmp}</span>`,
@@ -37,7 +37,7 @@ function drawHud() {
   ];
   // スマホは 1行を みじかく（文字を へらして、2〜3行に おさめる）
   const hudS = [
-    `<span>${icon('stairs', '階')}<b>${G.f}</b>/${LAST}階</span>`,
+    `<span>${icon('stairs', '階')}<b>${G.f}</b>/${LAST}階${curRule() ? ` <small class="rule">${RULES[curRule()].short}</small>` : isMidFloor(G.f) && midBossAlive() ? ' <small class="rule mid">ぬし</small>' : ''}${diffTag(runDiff) ? ` <small class="rule ura">${diffTag(runDiff)}</small>` : ''}</span>`,
     `<span>${icon('star', 'レベル')}Lv<b>${P.lv}</b></span>`,
     `<span class="${P.pinch ? 'low pinch' : low ? 'low' : ''}">${icon('heart', 'HP')}<b>${Math.max(0, P.hp)}</b>/${P.mhp}</span>`,
     `<span>${icon('drop', 'MP')}<b class="mpv">${P.mp}</b>/${P.mmp}</span>`,

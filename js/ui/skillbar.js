@@ -4,7 +4,7 @@
 // ===== わざの なかま分け =====
 // ここに ない わざは、まほうなら「まほう」、それ以外は「こうげき」に 入る
 const SKILL_TABS = [['all', 'ぜんぶ'], ['fav', '★よく使う'], ['atk', 'こうげき'], ['mag', 'まほう'], ['safe', '回復・にげる'], ['util', 'べんり・そうび']];
-const SKILL_GROUP = { heal: 'safe', smoke: 'safe', mayowase: 'safe',
+const SKILL_GROUP = { heal: 'safe', smoke: 'safe', mayowase: 'safe', bunshin: 'safe',
   steal: 'util', trapsee: 'util', appraise: 'util', forge: 'util', harden: 'util', anaake: 'util' };
 const skillGroup = s => SKILL_GROUP[s.id] || (s.kind === 'まほう' ? 'mag' : 'atk');
 

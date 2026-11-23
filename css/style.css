@@ -78,7 +78,7 @@ body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 .skbar button{font:inherit;font-size:14px;color:var(--fg);background:#2a2246;border:2px solid #4d4080;border-radius:6px;padding:4px 8px;touch-action:manipulation;line-height:1.1}
 .skbar button small{display:block;font-size:11px;color:#7ad8ff}.skbar button.ng{opacity:.45}
 .tip{color:var(--mut);font-size:13px;text-align:center}
-@media (min-width:900px){
+@media (min-width:900px),(min-width:640px) and (max-height:520px){
   .wrap{max-width:1400px;height:100dvh;padding-block:10px;grid-template-columns:minmax(0,1fr) 330px;grid-template-rows:auto minmax(0,1fr) auto;align-items:stretch}
   .hud{grid-column:1;grid-row:1;font-size:16px}
   .stagebox{grid-column:1;grid-row:2;min-height:0;display:flex;justify-content:center;align-items:center}
@@ -170,7 +170,7 @@ textarea.code{width:100%;font-family:monospace;font-size:13px;background:#17122a
 .over .pwhint{margin:4px 0 0;font-size:13px;color:#7cf0a0;min-height:1em}
 /* タイトルの あいだは もちもの・わざ・ボタンを かくす */
 .wrap.titlemode .row,.wrap.titlemode .tip,.wrap.titlemode .log{display:none}
-@media (min-width:900px){.wrap.titlemode{grid-template-columns:minmax(0,1fr)}}
+@media (min-width:900px),(min-width:640px) and (max-height:520px){.wrap.titlemode{grid-template-columns:minmax(0,1fr)}}
 /* 記録コード */
 .over .bktxt{width:100%;box-sizing:border-box;min-height:5.5em;font:12px/1.4 monospace;background:#17122a;color:#f2ecdf;border:2px solid #4d4080;border-radius:6px;padding:6px;word-break:break-all;margin-top:6px}
 .over .backup button{font-size:15px}
@@ -248,3 +248,207 @@ textarea.code{width:100%;font-family:monospace;font-size:13px;background:#17122a
 .invpop .multibar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:#3a1a2a;border:1px solid #ffd23f;border-radius:6px;padding:4px 8px;margin:2px 0 4px;color:#ffd23f}
 .invpop .multibar button{margin:0}.invpop .multibar button[disabled]{opacity:.5}
 .invpop .trdesc{display:block;font-size:.75em;color:#c9c6e6;line-height:1.35;margin-top:3px;border-top:1px dashed #4d4080;padding-top:2px}.invpop .trdesc b{color:#7cf0a0;font-weight:400}
+
+/* はじめる 階：レベルに あわせた 階を 5階きざみで えらぶ */
+.startpick .lvstep{display:flex;align-items:center;justify-content:center;gap:12px;margin:4px 0}
+.startpick .lvstep b{font-size:1.2em;min-width:6em;text-align:center}
+.startpick .lvstep button{min-width:48px;min-height:40px;font-size:1.2em}
+.startpick small{display:block;font-size:.8em;opacity:.8}
+.over .jobrow.top button.job{border-color:#ffd23f}
+/* 職業の つながり（トーナメント表） */
+.over .jobsel.tree{position:relative;gap:12px;padding:4px 6px 6px}
+.over .jobsel.tree .jobwires{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible}
+.over .jobwires path{fill:none;stroke-width:1.5}
+.over .jobwires .cold path{stroke:#4d408099}.over .jobwires .cold path.ok{stroke:#7a6ab0}
+.over .jobwires .hot path{stroke:#ffd23f;stroke-width:2.5}
+.over .jobtier{position:relative;display:flex;align-items:center;justify-content:center}
+.over .jobtier em{position:absolute;left:-2px;top:-9px;font-style:normal;font-size:9px;color:#a79fb8;letter-spacing:.06em}
+.over .jobsel.tree .jobrow{position:relative;z-index:1;flex-wrap:nowrap}
+.over .jobrow.up10{gap:3px}
+.over .jobrow.up10 button.job{width:62px;font-size:10px}
+.over .jobdesc .route{color:#7ad8ff}.over .jobdesc .route b{color:#ffd23f}
+@media (max-width:640px){
+  .over .jobrow.up10{gap:2px}
+  .over .jobrow.up10 button.job{width:32px;padding:2px 0 1px}
+  .over .jobrow.up10 button.job span{display:none}
+  .over .jobrow.up10 button.job img{width:26px;height:24px}
+}
+/* コレクション */
+.over .colpage{max-width:46em}
+.over .coltabs{display:flex;flex-wrap:wrap;gap:4px;justify-content:center;margin:6px 0}
+.over .coltabs button{margin:0;font-size:14px;padding:4px 10px;display:flex;flex-direction:column;align-items:center;line-height:1.15}
+.over .coltabs button small{font-size:11px;color:#a79fb8}.over .coltabs button.on small{color:#3a2f00}
+.over .colgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(15em,1fr));gap:6px;text-align:left;margin:6px 0 10px}
+.over .colcard{display:flex;gap:8px;align-items:flex-start;background:#0009;border:1px solid #4d4080;border-radius:8px;padding:6px 8px;min-width:0}
+.over .colcard img{width:40px;height:40px;object-fit:contain;image-rendering:pixelated;flex:none}
+.over .colcard .noimg{width:0;height:0;flex:none}
+.over .colcard div{display:flex;flex-direction:column;gap:1px;min-width:0}
+.over .colcard b{color:#ffd23f;font-weight:400}.over .colcard b em{font-style:normal;color:#ffd23f}
+.over .colcard small{font-size:12px;color:#d8d0e8}.over .colcard .coldesc{color:#f2ecdf}.over .colcard .colnext{color:#7ad8ff}
+.over .colcard.lock{opacity:.75}.over .colcard.lock b{color:#7a7490}
+@media (max-width:640px){.over .colgrid{grid-template-columns:1fr 1fr}.over .colcard{flex-direction:column;gap:2px;padding:5px}.over .colcard small{font-size:11px}.over .coltabs button{font-size:12px;padding:3px 7px}}
+.over .jobsel.tree{gap:24px;padding:14px 8px 8px}
+.over .jobtier em{left:0;top:-15px;font-size:10px;background:#0b0818;padding:0 4px;border-radius:4px;z-index:2}
+.over .jobrow.up10 button.job{width:68px;font-size:10px}
+@media (max-width:640px){.over .jobsel.tree{gap:20px;padding:12px 4px 6px}.over .jobrow.up10 button.job{width:32px}}
+.evoimg{width:28px;height:28px;image-rendering:pixelated;vertical-align:middle;margin-right:4px}
+/* コレクションの おと */
+.over .sndbox{text-align:left;margin:6px 0 10px}
+.over .sndhd{color:#ffd23f;margin:8px 0 4px}
+.over .sndgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(10em,1fr));gap:5px}
+.over .sndgrid.bgm{grid-template-columns:repeat(auto-fill,minmax(14em,1fr))}
+.over button.sndbtn{margin:0;font-size:14px;padding:6px 8px;text-align:left;background:#17122acc;border:2px solid #4d4080;color:#f2ecdf;border-radius:8px;display:flex;flex-direction:column;gap:1px}
+.over button.sndbtn b{color:#ffd23f;font-weight:400}.over button.sndbtn small{font-size:11px;color:#a79fb8}
+.over button.sndbtn.on{border-color:#ffd23f;background:#3a2f66}
+.over button.sndbtn.lock{opacity:.6;color:#7a7490}
+@media (max-width:640px){.over .sndgrid{grid-template-columns:1fr 1fr}.over .sndgrid.bgm{grid-template-columns:1fr}.over button.sndbtn{font-size:13px}}
+/* 冒険者データの そうこ：せつめいの 列を ひろく（PCでは 横に、スマホでは 名前の 下に） */
+.over .recpage.heropage{max-width:52em}
+.over .recrow.herorow{grid-template-columns:2.2em minmax(9em,13em) 1fr;align-items:baseline}
+.over .recrow.herorow{padding:4px 0}.over .recrow.herorow small{display:block;font-size:14px;line-height:1.5;color:#c8c0d8;min-width:0}
+@media (max-width:640px){
+  .over .recrow.herorow{grid-template-columns:2em 1fr}
+  .over .recrow.herorow small{display:block;grid-column:2;font-size:12px}
+}
+.over .backup .bkrow{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:6px 0}
+.over .backup .bkrow b{color:#ffd23f;font-weight:400;font-size:13px;width:100%}
+.over .backup .bkrow button{margin:0}
+/* 階の しかけ・ぬし */
+.hud small.rule{background:#3a2f66;border:1px solid #7ad8ff;color:#7ad8ff;border-radius:4px;padding:0 4px;font-size:11px;margin-left:2px}
+.hud small.rule.mid{border-color:#ff6b6b;color:#ff9a9a}
+/* 称号・ごほうび */
+.over .colpct{background:#0009;border:1px solid #4d4080;border-radius:8px;padding:6px 10px;text-align:left}
+.over .colpct b{color:#ffd23f;font-weight:400;font-size:18px}.over .colpct small{color:#a79fb8}
+.over .pctbar{height:8px;background:#2a2246;border-radius:4px;overflow:hidden;margin-top:4px}.over .pctbar i{display:block;height:100%;background:#ffd23f}
+.over .skinrow{display:flex;flex-wrap:wrap;gap:6px}
+.over button.skinbtn{margin:0;padding:4px 6px;width:76px;display:flex;flex-direction:column;align-items:center;gap:2px;background:#17122acc;border:2px solid #4d4080;color:#f2ecdf;border-radius:8px;font-size:11px}
+.over button.skinbtn img{width:36px;height:36px;image-rendering:pixelated}
+.over button.skinbtn.on{border-color:#ffd23f;background:#3a2f66}.over button.skinbtn.lock{opacity:.55}
+/* 階の しかけ・ぬし */
+.hud small.rule{background:#3a2f66;border:1px solid #7ad8ff;color:#7ad8ff;border-radius:4px;padding:0 4px;font-size:11px;margin-left:2px}
+.hud small.rule.mid{border-color:#ff6b6b;color:#ff9a9a}
+/* 称号・ごほうび */
+.over .colpct{background:#0009;border:1px solid #4d4080;border-radius:8px;padding:6px 10px;text-align:left}
+.over .colpct b{color:#ffd23f;font-weight:400;font-size:18px}.over .colpct small{color:#a79fb8}
+.over .pctbar{height:8px;background:#2a2246;border-radius:4px;overflow:hidden;margin-top:4px}.over .pctbar i{display:block;height:100%;background:#ffd23f}
+.over .skinrow{display:flex;flex-wrap:wrap;gap:6px}
+.over button.skinbtn{margin:0;padding:4px 6px;width:76px;display:flex;flex-direction:column;align-items:center;gap:2px;background:#17122acc;border:2px solid #4d4080;color:#f2ecdf;border-radius:8px;font-size:11px}
+.over button.skinbtn img{width:36px;height:36px;image-rendering:pixelated}
+.over button.skinbtn.on{border-color:#ffd23f;background:#3a2f66}.over button.skinbtn.lock{opacity:.55}
+/* コレクション：上の 見出し（もどる・タブ）を 固定 */
+.over .colhead{position:sticky;top:-16px;z-index:5;margin:-16px -16px 0;padding:10px 16px 6px;background:#0b0818f2;border-bottom:1px solid #4d4080;box-shadow:0 4px 10px #0008}
+.over .coltop{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:8px}
+.over .coltop h1{margin:0;font-size:clamp(22px,4vw,34px)}
+.over button.colback{margin:0;font-size:15px;padding:6px 12px}
+.over .colpad{width:6.2em}
+.over .colhead .coltabs{margin:6px 0 0}
+@media (max-width:640px){.over .colhead{top:-10px;margin:-10px -10px 0;padding:8px 10px 6px}.over button.colback{font-size:13px;padding:5px 8px}.over .colpad{width:4.6em}.over .coltop h1{font-size:22px}}
+.over .colhead{background:#0b0818;isolation:isolate}
+/* タイトル：やりたい ことで 3つに 分ける（あそぶ／見る・あつめる／データ・せってい） */
+.over.title .tbot{display:flex;flex-direction:column;align-items:center;gap:8px;width:100%;max-width:60em;margin:0 auto}
+.over .tsec{width:100%;box-sizing:border-box;background:#0b0818d9;border:1px solid #4d4080;border-radius:10px;padding:6px 10px 8px;text-align:center}
+.over .tsec.tplay{border:2px solid #ffd23f88}
+.over .tsh{margin:0 0 4px;font-size:16px;font-weight:400;color:#ffd23f;text-align:left;letter-spacing:.06em}
+.over .tsh i{font-style:normal;display:inline-block;width:1.4em;color:#7ad8ff}
+.over .tstep{font-size:13px;color:#c8c0d8;text-align:left;margin:6px 0 2px}
+.over .tstep b{display:inline-block;width:1.5em;height:1.5em;line-height:1.5em;text-align:center;border-radius:50%;background:#ffd23f;color:#1a1030;margin-right:6px;font-weight:400}
+.over .tsec .jobsel{margin:2px auto 4px}
+.over .tgo,.over .tbtns{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+.over .tgo button,.over .tbtns button{margin:0;display:flex;flex-direction:column;align-items:center;line-height:1.2;padding:6px 14px;font-size:16px}
+.over .tgo button small,.over .tbtns button small{font-size:11px;opacity:.85}
+.over .tgo button#go{font-size:18px;min-width:12em}
+.over .tsec .pwbox{margin-top:8px}
+.over .tsec .tnote{margin:2px 0;font-size:12px}
+.over button.tlink{margin:2px 0 0;background:none;border:none;color:#7ad8ff;text-decoration:underline;font-size:13px;padding:2px 6px}
+.over .tsub{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%}
+.over .tsub .tsec{margin:0}
+.over .tsub .tsz,.over .tsub .textsize{margin-top:6px}
+@media (max-width:640px){.over .tsub{grid-template-columns:1fr}.over .tgo button{flex:1 1 40%;padding:6px 8px}.over .tgo button#go{min-width:0;font-size:16px}.over .tsh{font-size:15px}}
+.over .tsec #goCont{margin:2px auto 4px;font-size:16px;padding:6px 16px}
+
+/* 横にした スマホ（高さが ひくい）：右の れつを せまく、ボタンを 小さく */
+@media (min-width:640px) and (max-width:899px) and (max-height:520px){
+  .wrap{grid-template-columns:minmax(0,1fr) 250px;gap:4px;padding-block:4px}
+  .hud{font-size:13px;padding:3px 8px}.log{font-size:12px;max-height:3.2em;overflow:hidden}
+  .row .inv{display:none}
+  .side{flex-direction:column;align-items:center;gap:6px}
+  .pad{grid-template-columns:repeat(3,46px);grid-template-rows:repeat(3,46px);gap:3px}
+  .ctl{width:100%;grid-template-columns:repeat(3,minmax(0,1fr));gap:3px}
+  .ctl .big{grid-column:1/4;font-size:14px;padding:3px 4px}.ctl .big br{display:none}
+  .ctl #sndBtn{grid-column:span 2}
+  .ctl .sub{font-size:12px!important;padding:4px 1px!important;min-width:0;overflow:hidden}
+  .skbar{flex-wrap:nowrap;overflow-x:auto;padding:2px}
+  .over .jobrow.up10{gap:2px}
+  .over .jobrow.up10 button.job,.over .jobsel.tree .jobrow.up10 button.job{width:34px;padding:2px 0 1px}
+  .over .jobrow.up10 button.job span{display:none}
+  .over .jobrow.up10 button.job img{width:26px;height:24px}
+  .wrap.titlemode{height:auto;min-height:100dvh}
+}
+/* タブレットの たて：もちもの一覧を みじかく して、地図と ボタンを 1画面に */
+@media (min-width:640px) and (max-width:899px) and (min-height:521px){
+  .inv .help,.tip{display:none}
+  .inv #inv{max-height:150px;overflow:auto}
+  .stagebox{display:flex;justify-content:center}
+}
+/* はばの せまい スマホ：上位の 職業 10こが 1れつに おさまるよう 小さく */
+@media (max-width:380px){
+  .over .jobrow.up10{gap:1px}
+  .over .jobrow.up10 button.job,.over .jobsel.tree .jobrow.up10 button.job{width:29px}
+  .over .jobrow.up10 button.job img{width:24px;height:22px}
+}
+
+/* 裏モード */
+.over .tstep.ura b{background:#b34dff;color:#fff}
+.over .diffsel{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin:4px 0 8px}
+.over .diffsel button{padding:6px 4px;line-height:1.2;min-width:0;border-color:#4d4080;color:var(--mut);background:#1c1636}
+.over .diffsel button.on{background:#3a2c08}
+.over .diffsel button.d-vhard.on{background:#3a0f1a}
+.over .diffsel button small{display:block;font-size:10px;color:var(--mut);margin-top:2px}
+.over .diffsel button.on{border-color:#ffd23f;box-shadow:0 0 0 2px #ffd23f inset;color:#ffd23f}
+.over .diffsel button.d-vhard.on{border-color:#ff4d6d;box-shadow:0 0 0 2px #ff4d6d inset;color:#ff8da0}
+.over .urahint{opacity:.8}
+small.rule.ura{background:#5a1f7a;border-color:#b34dff;color:#f0d0ff}
+@media (max-width:640px){.over .diffsel{grid-template-columns:1fr 1fr}.over .diffsel button small{font-size:9.5px}}
+
+/* バージョン表示 */
+.over .tver{margin:-4px 0 4px;font-size:12px;color:#a79fc8;letter-spacing:.08em}
+
+/* タイトルの デモ・あらすじ */
+.stage .attract{position:absolute;z-index:30;pointer-events:none}
+.stage .attract.story{inset:0;background:#05030d;display:flex;align-items:center;justify-content:center;padding:6%}
+.stage .attract .storyin{display:grid;gap:14px;text-align:center;max-width:48em}
+.stage .attract .storyin p{margin:0;text-wrap:balance;font-size:clamp(14px,2.1vw,20px);color:#f2ecff;opacity:0;animation:storyin 1.2s ease forwards}
+.stage .attract .storyin p.ep{font-size:13px;color:#ffd23f;letter-spacing:.2em;animation-delay:0s}
+.stage .attract .storyin p.hint{font-size:12px;color:#a79fc8;animation-delay:5.4s}
+@keyframes storyin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.stage .attract.demotag{left:50%;bottom:6%;transform:translateX(-50%);background:rgba(5,3,13,.78);border:2px solid #ffd23f;border-radius:6px;padding:4px 12px;display:flex;gap:10px;align-items:baseline;white-space:nowrap;animation:blink 1.6s steps(2) infinite}
+.stage .attract.demotag b{color:#ffd23f;font-weight:normal;font-size:16px}.stage .attract.demotag span{font-size:12px;color:#f2ecff}
+@keyframes blink{50%{opacity:.55}}
+/* エンディング */
+.stage .ending{position:absolute;inset:0;z-index:40;background:#05030d;overflow:hidden}
+.stage .ending .roll{position:absolute;left:0;right:0;top:100%;display:grid;gap:34px;padding:0 8% 40px;text-align:center;animation:roll 38s linear forwards}
+@keyframes roll{to{transform:translateY(calc(-100% - var(--sh,60vh)))}}
+.stage .ending.done .roll{animation:none;top:auto;bottom:0;transform:none}
+.stage .ending.done .roll .esec:not(.end){display:none}
+.stage .ending .esec{display:grid;gap:4px}
+.stage .ending .esec h3{margin:0;font-size:12px;color:#a79fc8;font-weight:normal;letter-spacing:.15em}
+.stage .ending .esec p{margin:0;font-size:clamp(14px,2.2vw,19px);color:#f2ecff}
+.stage .ending .esec.big p{font-size:clamp(15px,2.6vw,22px);line-height:1.9}
+.stage .ending .esec.hero img{width:64px;height:64px;image-rendering:pixelated;margin:0 auto}
+.stage .ending .parade{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+.stage .ending .parade img{width:36px;height:36px;image-rendering:pixelated;animation:hop .8s ease-in-out infinite alternate}
+.stage .ending .parade img:nth-child(2n){animation-delay:.4s}
+@keyframes hop{to{transform:translateY(-4px)}}
+.stage .ending .theend{font-size:clamp(26px,5vw,42px)!important;color:#ffd23f!important;letter-spacing:.15em}
+.stage .ending .next{color:#7ad8ff!important;font-size:14px!important}
+.stage .ending .ver{color:#a79fc8!important;font-size:12px!important}
+.stage .ending.done{display:flex;align-items:center;justify-content:center}
+.stage .ending.done .roll{position:static}
+.stage .ending #endSkip{position:absolute;right:10px;bottom:10px;z-index:2;font-size:13px;padding:4px 10px}
+@media (prefers-reduced-motion:reduce){.stage .ending .roll{animation-duration:1ms}.stage .ending .parade img,.stage .attract.demotag{animation:none}}
+
+/* コレクションの ムービー */
+.over .sndbox .moviebtn{display:flex;flex-direction:column;align-items:flex-start;gap:2px;width:100%;margin:0 0 8px;padding:10px 12px;text-align:left;background:#0009;border:1px solid #4d4080;border-radius:8px;color:#f2ecff;font:inherit}
+.over .sndbox button.moviebtn{cursor:pointer}.over .sndbox button.moviebtn:hover{border-color:#ffd23f}
+.over .sndbox .moviebtn b{color:#ffd23f;font-weight:400;font-size:16px}.over .sndbox .moviebtn small{color:#a79fb8;font-size:12px}
+.over .sndbox .moviebtn.lock b{color:#a79fb8}

@@ -6,8 +6,8 @@ let trSeq = 1;
 function trRoll() { trSeq = hashSeed('tr:' + trSeq); return (trSeq % 100000) / 100000; }
 function trReset(f, v) { trSeq = hashSeed(runSeed + ':tr:' + f + ':' + v); }
 // 防具の 特性を、あとから ふやした 特性も ふくめた 全部の 中から えらびなおす（同じ 特性が かさなるときは そのまま）
-function widenTraits(o) { if (!ITEMS[o.k].equip || ITEMS[o.k].equip === 'atk' || !o.traits) return o;
-  const all = Object.keys(TRAITS).filter(x => TRAITS[x].slot === 'def');
+function widenTraits(o) { if (!ITEMS[o.k].equip || !o.traits) return o;
+  const slot = ITEMS[o.k].equip === 'atk' ? 'atk' : 'def', all = Object.keys(TRAITS).filter(x => TRAITS[x].slot === slot);
   o.traits = o.traits.map(t => { const n = all[Math.floor(trRoll() * all.length)]; return o.traits.includes(n) ? t : n; });
   o.traits = [...new Set(o.traits)]; return o; }
 function shopItem(k, tier) { const o = newItem(k, 'shop'); if (!ITEMS[k].equip) return o;
@@ -20,7 +20,7 @@ function zap(o, effect) { if (o.n <= 0) return '杖を ふったが、もう 何
 let FAKE = {};
 function shuffleFake() { FAKE = {}; for (const cat of Object.keys(FAKE_NAMES)) { const names = [...FAKE_NAMES[cat]]; for (let i = names.length - 1; i > 0; i--) { const j = ri(0, i); [names[i], names[j]] = [names[j], names[i]]; }
   Object.keys(ITEMS).filter(k => ITEMS[k].cat === cat).forEach((k, i) => FAKE[k] = names[i]); } }
-const isKnown = k => !ITEMS[k].cat || P.known.has(k);
+const isKnown = k => !ITEMS[k].cat || ITEMS[k].known || P.known.has(k);
 function newItem(k, from) { const o = { k, plus: 0, traits: [] }; const it = ITEMS[k];
   if (it.equip && rnd() < .45) { o.traits.push(pick(GEN_TRAITS[it.equip === 'atk' ? 'atk' : 'def'])); widenTraits(o); }
   if (it.equip && from === 'floor' && rnd() < .15) o.cursed = true;

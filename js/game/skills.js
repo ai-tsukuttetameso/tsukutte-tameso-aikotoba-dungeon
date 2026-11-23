@@ -52,6 +52,14 @@ const SKILLS = [
   { id: 'zeninage', name: 'ぜになげ', mp: 3, kind: 'とくぎ', desc: 'お金を 投げつける（地下の 階 × 10G つかう）。大ダメージ', run: () => { const cost = 10 * G.f; if (P.gold < cost) { say(`お金が たりない。（ぜになげは ${cost}G）`); return false; }
     const r = ray(8); fx(r.path, '#ffd23f'); P.gold -= cost; say(`ぜになげ！ ${cost}ゴールドを 投げた。`); if (!r.m) { say('……でも どこにも 当たらなかった。お金は どこかへ ころがっていった。'); return true; }
     const d = 15 + P.lv * 3 + G.f; hitMon(r.m, d, `${r.m.name}に ${d}の ダメージ！`); return true; } },
+  // ---- 最上位職の とっておき ----
+  { id: 'hikari', name: 'ひかりのつるぎ', mp: 10, kind: 'とくぎ', desc: 'まわり8マスの敵 ぜんぶに 2倍の こうげき', run: () => { const ms = G.mons.filter(m => Math.max(Math.abs(m.x - P.x), Math.abs(m.y - P.y)) === 1);
+    const cells = []; for (let y = P.y - 1; y <= P.y + 1; y++) for (let x = P.x - 1; x <= P.x + 1; x++) if (isFloor(x, y)) cells.push([x, y]); boom(cells, '#fff4a0'); shake(6); say('ひかりのつるぎ！');
+    if (!ms.length) say('でも まわりに 敵は いなかった。'); for (const m of ms) attack(m, 2); return true; } },
+  { id: 'tenchi', name: 'てんちのいかり', mp: 16, kind: 'まほう', el: 'thunder', desc: '見えている敵 ぜんぶに 炎・氷・雷を つづけて おとす', run: () => { const ms = G.mons.filter(m => visible(m.x, m.y)); shake(12);
+    say('てんちのいかり！'); boom(ms.map(m => [m.x, m.y]), '#ffffff'); if (!ms.length) say('でも 敵は いなかった。');
+    for (const el of ['fire', 'ice', 'thunder']) for (const m of ms) if (G.mons.includes(m)) elemHit(m, 8 + P.lv * 2, el); return true; } },
+  { id: 'bunshin', name: 'かげぶんしん', mp: 8, kind: 'とくぎ', desc: '5ターンの あいだ、敵の こうげきを ぜんぶ 分身が うける', run: () => { P.bunshin = 5; boom([[P.x, P.y]], '#6a4ad8'); say('かげぶんしん！ 分身が あらわれた。（5ターン）'); return true; } },
 ];
 // 目の前の 敵（いなければ メッセージを 出して null）
 function frontMon() { const [dx, dy] = P.dir; const m = monAt(P.x + dx, P.y + dy); if (!m) say('目の前に 敵が いない。（向きを 変えてから 使おう）'); return m; }
@@ -71,6 +79,7 @@ function useSkill(id) { if (G.over) return; const s = mySkills().find(x => x.id 
   if (P.lv < s.lv) { say(`「${s.name}」は レベル${s.lv}で おぼえる。`); render(); return; }
   const cost = skillCost(s); if (P.mp < cost) { say(`MPが たりない。（${s.name}は MP${cost}）`); render(); return; }
   if (P.skip > 0) { act(0, 0); return; }
-  const ok = s.kind === 'まほう' ? withMagic(s.run) : s.run(); if (ok === false) { render(); return; } sfx(skillSound(s)); P.mp -= cost; endTurn(); }
+  const ok = s.kind === 'まほう' ? withMagic(s.run) : s.run(); if (ok === false) { render(); return; } sfx(skillSound(s));
+  if (hasTrait('setsuyaku') && rnd() < .25) say('せつやく！ MPを つかわずに すんだ。'); else P.mp -= cost; progAdd('skillUse', s.id); endTurn(); }
 // まほうのぼうしを そうびしていると MPが 1 へる
-const skillCost = s => Math.max(1, s.mp - (eqPerk('mpcut') ? 1 : 0));
+const skillCost = s => { const c = Math.max(1, s.mp - (eqPerk('mpcut') ? 1 : 0)); const c2 = jobHas('archsage') ? Math.ceil(c / 2) : c; return typeof ruleIs === 'function' && ruleIs('magic') ? Math.max(1, Math.ceil(c2 / 2)) : c2; };

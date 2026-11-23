@@ -45,9 +45,20 @@ const JOBS = {
     desc: '杖の 回数＋2、草を 使うと MP＋5。とっておき「おうごんのて」' },
   akindo: { name: 'あきんど', from: ['smith', 'tool'], perks: ['merchant'], skills: { zeninage: 4 },
     desc: 'お店で 3わり引き・高く 売れる・お金 1.5倍。とっておき「ぜになげ」' },
+  // 最上位の 職業：上位の 職業を 3つか 4つ きわめると なれる（3つだけ）。もとの 職業の とくいと わざを ぜんぶ もつ
+  //   brave：ふつうの こうげき 1.25倍・最大HP＋15 ／ archsage：わざの MPが 半分（切り上げ）
+  //   shadow：敵の こうげきを 3回に 1回 分身が かわりに うける
+  yuusha: { name: 'ゆうしゃ', from: ['mken', 'bmaster', 'dancer', 'hunter'], perks: ['brave'], skills: { hikari: 8 },
+    desc: 'ふつうの こうげきが 1.25倍、最大HP＋15。とっておき「ひかりのつるぎ」' },
+  daikenja: { name: 'だいけんじゃ', from: ['kenja', 'renkin', 'genjutsu', 'akindo'], perks: ['archsage'], skills: { tenchi: 9 },
+    desc: 'わざの MPが 半分で すむ。とっておき「てんちのいかり」' },
+  kagenoou: { name: 'かげのおう', from: ['ninja', 'karakuri', 'genjutsu'], perks: ['shadow'], skills: { bunshin: 8 },
+    desc: '敵の こうげきを 3回に 1回 分身が かわりに うける。とっておき「かげぶんしん」' },
 };
 const BASE_JOBS = ['senshi', 'thief', 'smith', 'mage', 'tool'];
 const UPPER_JOBS = ['mken', 'ninja', 'kenja', 'bmaster', 'dancer', 'hunter', 'karakuri', 'genjutsu', 'renkin', 'akindo'];
+const TOP_JOBS = ['yuusha', 'daikenja', 'kagenoou'];
+const ALL_JOBS = [...BASE_JOBS, ...UPPER_JOBS, ...TOP_JOBS];
 // 職業レベル：たおした 敵の けいけんちが そのまま 職業の けいけんちに なる（冒険を こえて のこる）
 // レベル5で「きわめた」。2つ きわめると 上位の 職業が ひらく
 const JOB_NEED = [0, 60, 150, 300, 500];

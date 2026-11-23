@@ -117,6 +117,20 @@ const TRAITS = {
   chizu: { name: 'ちずよみ', slot: 'def', desc: '階に 入ると 階段の 場所が わかる' },
   robomamori: { name: 'ロボよけ', slot: 'def', desc: 'AI暴走ロボからの ダメージが 半分' },
   dekamamori: { name: 'でかこわよけ', slot: 'def', desc: 'でかこわ（王も）からの ダメージが 4分の3' },
+  // v1.57 で ふやした 特性（武器）
+  ikazuchi: { name: '雷の刃', slot: 'atk', desc: 'ふつうの こうげきが 雷の属性に なる' },
+  kaishin: { name: 'かいしん', slot: 'atk', desc: 'ふつうの こうげきが 8回に1回 かいしんの いちげき（2倍）' },
+  mpkyuu: { name: 'まりょく吸収', slot: 'atk', desc: 'なぐると 3回に1回 MP＋1' },
+  hirumi: { name: 'ひるませ', slot: 'atk', desc: 'なぐると 5回に1回 敵が 1ターン うごけない' },
+  rengeki: { name: 'れんげき', slot: 'atk', desc: 'ふつうの こうげきで 6回に1回 もう1回 こうげき' },
+  kinkiri: { name: 'こがねぎり', slot: 'atk', desc: '敵を たおすと お金＋（地下の 階 × 5）' },
+  nushikiller: { name: 'ぬし特効', slot: 'atk', desc: 'ぬしと でかこわの王に 1.5倍' },
+  // v1.57 で ふやした 特性（防具）
+  wanayoke: { name: 'わなよけ', slot: 'def', desc: 'わなを ふんでも 3回に1回 なにも おきない' },
+  kaifuku: { name: '回復じょうず', slot: 'def', desc: '草や 弁当で ふえる HP・おなかが 1.5倍' },
+  fumibari: { name: 'ふんばり', slot: 'def', desc: '1つの 階で 1回だけ、HPが 0に なっても 1で たえる' },
+  takarami: { name: 'たからみ', slot: 'def', desc: '階に 入ると 道具の 場所が わかる' },
+  setsuyaku: { name: 'せつやく', slot: 'def', desc: 'わざを 使っても 4回に1回 MPが へらない' },
 };
 // 道具が 生まれるときに 特性を えらぶ 元の 一覧（ここは かえない＝同じ 合言葉の 乱数の 並びを そのままに する）。
 // あとから ふやした 特性は、べつの 乱数（trRoll）で 入れかえて 出す

@@ -25,4 +25,4 @@ function checkBackup(code) { const s = String(code || '').replace(/\s+/g, '');
 function importData(code) { const c = checkBackup(code); if (!c.ok) return c;
   try { for (const k of backupKeys()) localStorage.removeItem(k); for (const k of c.keys) localStorage.setItem(k, String(c.data[k])); }
   catch (e) { return { ok: false, msg: 'この ブラウザでは 記録を 書きこめませんでした。' }; }
-  return c; }
+  progForget(); return c; }

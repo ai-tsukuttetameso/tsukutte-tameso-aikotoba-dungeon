@@ -8,14 +8,15 @@ const REC_KEY = 'aikotoba_clears', REC_MAX = 100;
 
 function loadClears() { try { const a = JSON.parse(localStorage.getItem(REC_KEY) || '[]'); return Array.isArray(a) ? a : []; } catch (e) { return []; } }
 // いまの ダンジョンを 見分ける かぎ（同じ合言葉・同じ日の記録どうしで くらべる）
-const runKey = () => runMode === 'daily' ? 'daily:' + daily : 'pw:' + normPw(password) + (LAST !== 10 ? ':' + LAST : '');
-const runLabel = r => r.mode === 'daily' ? `今日のダンジョン（${r.daily}）` : `合言葉「${r.pw}」${r.depth && r.depth !== 10 ? `（地下${r.depth}階）` : ''}`;
+const runKey = () => (runMode === 'daily' ? 'daily:' + daily : 'pw:' + normPw(password) + (LAST !== 10 ? ':' + LAST : '')) + (runDiff !== 'normal' ? '@' + runDiff : '');
+const runLabel = r => (r.mode === 'daily' ? `今日のダンジョン（${r.daily}）` : `合言葉「${r.pw}」${r.depth && r.depth !== 10 ? `（地下${r.depth}階）` : ''}`) + (diffTag(r.diff) ? `・${diffTag(r.diff)}` : '');
 
 // クリアしたときに 1回だけ よぶ。保存した記録を かえす
 function saveClear() {
   const d = new Date(), pad = n => String(n).padStart(2, '0');
   const r = { at: `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`,
-    mode: runMode, pw: password, daily, depth: LAST, treasure, key: runKey(), turn: P.turn, lv: P.lv, gold: P.gold, job: P.job, from: P.startF || 1 };
+    mode: runMode, pw: password, daily, depth: LAST, treasure, key: runKey(), turn: P.turn, lv: P.lv, gold: P.gold, job: P.job, from: P.startF || 1, diff: runDiff };
+  if (LAST === 100) { progMark('ura', 'open'); progFlush(); }
   const a = loadClears(); a.push(r); while (a.length > REC_MAX) a.shift();
   try { localStorage.setItem(REC_KEY, JSON.stringify(a)); } catch (e) {}
   return r; }
@@ -25,7 +26,7 @@ function rankOf(r) { const same = loadClears().filter(x => x.key === r.key).sort
 
 function shareText(r) {
   const where = r.mode === 'daily' ? `今日のダンジョン（${r.daily}）` : `合言葉「${r.pw}」の 地下${r.depth || 10}階${r.treasure ? '（おたから）' : ''}ダンジョン`;
-  return `${GAME_NAME}を ${r.from > 1 ? `地下${r.from}階から ` : ''}${r.turn}ターンで クリア！（${JOBS[r.job] ? JOBS[r.job].name + '・' : ''}Lv${r.lv}・${r.gold}G）\n${where}は、同じ合言葉と 深さを えらぶと だれでも 同じ地図で 挑戦できます。\n${SHARE_TAGS}${SHARE_URL ? '\n' + SHARE_URL : ''}`; }
+  return `${r.title ? `【${r.title}】` : ''}${diffTag(r.diff) ? `［裏モード・${diffTag(r.diff)}］` : ''}${GAME_NAME}を ${r.from > 1 ? `地下${r.from}階から ` : ''}${r.turn}ターンで クリア！（${JOBS[r.job] ? JOBS[r.job].name + '・' : ''}Lv${r.lv}・${r.gold}G）\n${where}は、同じ合言葉と 深さを えらぶと だれでも 同じ地図で 挑戦できます。\n${SHARE_TAGS}${SHARE_URL ? '\n' + SHARE_URL : ''}`; }
 
 // クリア画面に 出す「記録とシェア」の部分
 // u＝おなじ 画面に いくつも 出すときの 見分け（クリアの記録の 一覧で つかう）

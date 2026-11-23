@@ -62,13 +62,15 @@ function render() {
   for (const t of G.traps) if (t.found && inView(t.x, t.y)) { const [X, Y] = at(t.x, t.y); dI(S[TRAPS[t.k].spr], X, Y + 4); }
   const tags = [];
   for (const it of G.items) if (visible(it.x, it.y) && inView(it.x, it.y)) { const [X, Y] = at(it.x, it.y); dI(S[it.k === 'gold' ? 'gold' : ITEMS[it.k].spr], X - 1, Y + 2 + Math.round(Math.sin(tt * 3 + it.x) * .6)); if (it.price) tags.push(`<span class="tag" style="left:${(X + 8) / LW * 100}%;top:${(Y + 17) / LH * 100}%" title="お店の うりもの（はらわずに 出ると 店主が おこる）"><b>売</b>${it.price}G</span>`); }
-  const drawMon = m => { const [X, Y] = at(m.x, m.y); const sp = m.elite ? eliteOf(S[MON[m.t].spr]) : S[MON[m.t].spr]; const bob = Math.round(Math.sin(tt * 4 + m.x * 1.7) * 1);
+  const drawMon = m => { const [X, Y] = at(m.x, m.y); const sp = m.shin ? S.dekakowa_shin : m.elite ? eliteOf(S[MON[m.t].spr]) : S[MON[m.t].spr]; const bob = Math.round(Math.sin(tt * 4 + m.x * 1.7) * 1);
     const [lx, ly] = lunge(m.anim, now), fl = P.x < m.x;  // 敵は 主人公の ほうを むく
     let ox = X - 1 + lx, oy = Y - 1 + bob + ly; if (MON[m.t].big) { ox = X - 9; oy = Y - 18 + bob; }
     if (MON[m.t].dance) { ox += Math.round(Math.sin(tt * 10) * 1.5); }
     g.fillStyle = 'rgba(0,0,0,.35)'; g.beginPath(); g.ellipse(X + 8, Y + 14, MON[m.t].big ? 12 : 6, 2.5, 0, 0, 7); g.fill();
+    if (m.shin) { const pu = (Math.sin(tt * 4) + 1) / 2, cx = ox + sp.width / 2, cy = oy + sp.height / 2, gr = g.createRadialGradient(cx, cy, 4, cx, cy, 24); gr.addColorStop(0, `rgba(200,20,90,${.4 + .3 * pu})`); gr.addColorStop(1, 'rgba(120,0,80,0)'); g.fillStyle = gr; g.fillRect(cx - 26, cy - 26, 52, 52); }
     if (m.elite) { const pu = (Math.sin(tt * 5 + m.x) + 1) / 2, cx = ox + sp.width / 2, cy = oy + sp.height / 2, gr = g.createRadialGradient(cx, cy, 2, cx, cy, 13); gr.addColorStop(0, `rgba(255,80,220,${.35 + .25 * pu})`); gr.addColorStop(1, 'rgba(255,80,220,0)'); g.fillStyle = gr; g.fillRect(cx - 14, cy - 14, 28, 28); }
     dI(sp, ox, oy, fl); if (m.flash > 0) { m.flash--; g.globalAlpha = .7; dI(whiteOf(sp), ox, oy, fl); g.globalAlpha = 1; }
+    if (m.shin) { g.fillStyle = '#ffd23f'; const cx = ox + (sp.width >> 1); for (const [dx, h] of [[-6, 3], [-3, 4], [0, 6], [3, 4], [6, 3]]) g.fillRect(cx + dx, oy - 2 - h, 1, h); g.fillRect(cx - 6, oy - 2, 13, 2); g.fillStyle = '#ff3d7f'; g.fillRect(cx, oy - 5, 1, 1); }
     if (m.elite) { g.fillStyle = '#ffd23f'; const cx = ox + (sp.width >> 1); g.fillRect(cx - 3, oy - 3, 1, 2); g.fillRect(cx, oy - 4, 1, 3); g.fillRect(cx + 3, oy - 3, 1, 2); g.fillRect(cx - 3, oy - 1, 7, 1); }
     if (m.stuck > 0) { dI(S.sticker, X + 4, Y - 6); }
     if (m.sleep) { g.fillStyle = '#c9e6ff'; g.font = '8px monospace'; g.fillText('z', X + 12, Y - 2 + Math.round(Math.sin(tt * 2) * 2)); }
@@ -79,7 +81,7 @@ function render() {
     g.fillStyle = 'rgba(0,0,0,.35)'; g.beginPath(); g.ellipse(X + 8, Y + 14, 6, 2.5, 0, 0, 7); g.fill();
     // 向き：左右は 反転、上むきは うしろ すがた
     if (P.dir[0]) P.faceL = P.dir[0] < 0; const [lx, ly] = lunge(P.anim, now);
-    dI(heroSprite(P.job, P.dir[1] < 0), X - 1 + bob + lx, Y - 2 + ly, !!P.faceL); if (P.flash > 0) { P.flash--; g.globalAlpha = .45; g.fillStyle = '#ff3030'; g.fillRect(X + 2, Y, 12, 14); g.globalAlpha = 1; } }
+    dI(heroLook(P.job, P.dir[1] < 0), X - 1 + bob + lx, Y - 2 + ly, !!P.faceL); if (P.flash > 0) { P.flash--; g.globalAlpha = .45; g.fillStyle = '#ff3030'; g.fillRect(X + 2, Y, 12, 14); g.globalAlpha = 1; } }
   for (const m of G.mons) if (visible(m.x, m.y) && inView(m.x, m.y) && MON[m.t].big) drawMon(m);
   { const [X, Y] = at(P.x, P.y); const [dx, dy] = P.dir; const ax = X + 8 + dx * 10, ay = Y + 8 + dy * 10; g.fillStyle = 'rgba(255,255,255,.75)'; g.fillRect(ax - 1, ay - 1, 2, 2); g.fillRect(ax - 1 - dx, ay - 1 - dy, 2, 2); }
   if (G.boom && G.boom.t > 0) { g.globalAlpha = .25 + .1 * G.boom.t; g.fillStyle = G.boom.color; for (const [x, y] of G.boom.cells) { const [X, Y] = at(x, y); g.fillRect(X + 1, Y + 1, 14, 14); } g.globalAlpha = 1; G.boom.t--; }

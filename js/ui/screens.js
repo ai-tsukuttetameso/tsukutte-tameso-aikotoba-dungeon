@@ -18,21 +18,35 @@ function showOver(kind) {
   const rec = kind === 'clear' ? saveClear() : null;
   // 冒険者データに のこす（レベル・お金・装備）
   const bank = (kind === 'dead' || kind === 'clear') && !previewRun ? bankRun(kind) : null;
-  const bankLine = bank ? `<p class="bankline">冒険者データに のこした：Lv${P.lv}・${bank.gold}G${bank.lost ? `（力つきて ${bank.lost}G おとした）` : ''}・装備 ${bank.gear}こ</p>` : '';
+  const newT = (kind === 'dead' || kind === 'clear') && !previewRun ? checkTitles(true) : []; if (rec) rec.title = wornTitle();
+  const bankLine = (newT.length ? `<p class="bankline" style="color:#ffd23f">称号を 手に入れた：${newT.join('・')}</p>` : '') + (bank ? `<p class="bankline">冒険者データに のこした：Lv${P.lv}・${bank.gold}G${bank.lost ? `（力つきて ${bank.lost}G おとした）` : ''}・装備 ${bank.gear}こ</p>` : '');
   if (kind === 'dead' || kind === 'clear') clearLocalSave();  // 冒険が おわったら セーブは けす
   over.hidden = false; invpop.hidden = true; if (kind === 'title') document.getElementById('banner').hidden = true; overKind = kind; over.className = 'over ' + kind; mmw.hidden = kind === 'title'; setTitleMode(kind === 'title'); fitView();
   if (kind === 'dead') { setTimeout(() => sfx('dead'), 150); shake(8); } if (kind === 'clear') setTimeout(() => sfx('clear'), 150);
   const pwLine = `<p class="pwline">合言葉「<b>${escH(password)}</b>」${LAST !== 10 ? `（地下${LAST}階）` : ''}${treasure ? '・おたからダンジョン' : ''}　← 友だちに教えると、同じダンジョンで 勝負できる</p>`;
   const again = `${pwLine}<button id="goSame">同じ合言葉で もう一度</button> <button id="go" class="alt">新しい ダンジョン（Enter）</button> <button id="goDaily" class="alt">今日のダンジョン</button> <button id="goTitle" class="alt">タイトルに もどる</button>`;
   if (kind === 'title') { setHtml('hud', ''); document.getElementById('log').innerHTML = '<div>「はじめる」を おすと 冒険が はじまる。</div>'; }
-  if (kind === 'title') over.innerHTML = `<div class="ttl"><h1>${GAME_NAME}</h1><p class="tdesc"><span>15の職業 × 地下100階</span> <span>× 合言葉の数だけ ダンジョン</span></p>${progHtml()}</div><div class="tbot">${continueBtnHtml()}${jobSelHtml()}${bestLine('aikotoba_daily_' + todayKey(), '今日のダンジョン')}<button id="go">はじめる（Enter）</button> <button id="goDaily" class="alt">今日のダンジョン</button> <button id="goRec" class="alt">クリアの記録</button> <button id="goCode" class="alt">ふっかつの合言葉</button> <button id="goHero" class="alt">冒険者データ</button><div class="pwbox"><input id="pwIn" maxlength="24" placeholder="合言葉を 入れる（例：ねこ・たまご・そら）" autocomplete="off"><select id="depthIn" title="ダンジョンの 深さ">${DEPTHS.map(d => `<option value="${d}">地下${d}階${d === 10 ? '（ふつう）' : d >= 50 ? '（とても長い）' : ''}</option>`).join('')}</select><button id="goPw" class="alt">合言葉で ダンジョン生成</button></div><p class="pwhint" id="pwHint"></p><p class="tnote">合言葉と 深さから ダンジョンを 生成。同じなら だれでも 同じ地図。職業を きわめると 上位の 職業が ひらきます</p><p class="tsound">♪ 画面を タップすると 音楽が ながれます</p>${textSizeHtml()}</div>`;
+  if (kind === 'title') over.innerHTML = `<div class="ttl"><h1>${GAME_NAME}</h1><p class="tver">${GAME_EPISODE}　Ver ${GAME_VERSION}</p><p class="tdesc"><span>18の職業 × 地下100階</span> <span>× 合言葉の数だけ ダンジョン</span></p>${progHtml()}</div><div class="tbot">`
+    // ① あそぶ：職業 → ダンジョンの 順に えらぶ
+    + `<section class="tsec tplay"><h2 class="tsh"><i>▶</i>あそぶ</h2>${continueBtnHtml()}`
+    + `<div class="tstep"><b>1</b>職業を えらぶ</div>${jobSelHtml()}`
+    + `<div class="tstep"><b>2</b>ダンジョンを えらぶ</div>`
+    + diffSelHtml()
+    + `<div class="tgo"><button id="go">はじめる（Enter）<small>おまかせの ダンジョン</small></button><button id="goDaily" class="alt">今日のダンジョン<small>みんな 同じ 1日1つ</small></button></div>${bestLine('aikotoba_daily_' + todayKey(), '今日のダンジョン')}`
+    + `<div class="pwbox"><input id="pwIn" maxlength="24" placeholder="合言葉を 入れる（例：ねこ・たまご・そら）" autocomplete="off"><select id="depthIn" title="ダンジョンの 深さ">${DEPTHS.map(d => `<option value="${d}">地下${d}階${d === 10 ? '（ふつう）' : d >= 50 ? '（とても長い）' : ''}</option>`).join('')}</select><button id="goPw" class="alt">合言葉で あそぶ</button></div><p class="pwhint" id="pwHint"></p>`
+    + `<p class="tnote">合言葉と 深さが 同じなら、だれでも 同じ地図。友だちと 勝負できます</p>`
+    + `<button id="goCode" class="tlink">ふっかつの合言葉で つづきから</button></section>`
+    // ② 見る・あつめる ③ データ・せってい
+    + `<div class="tsub"><section class="tsec"><h2 class="tsh"><i>★</i>見る・あつめる</h2><div class="tbtns"><button id="goCol" class="alt">コレクション<small>図鑑・称号・おと</small></button><button id="goRec" class="alt">クリアの記録<small>タイムと シェア</small></button></div></section>`
+    + `<section class="tsec"><h2 class="tsh"><i>⚙</i>データ・せってい</h2><div class="tbtns"><button id="goHero" class="alt">冒険者データ<small>そうこ・記録ファイルの ほぞん</small></button></div>${textSizeHtml()}</section></div>`
+    + `<p class="tsound">♪ 画面を タップすると 音楽が ながれます</p></div>`;
   if (kind === 'dead') { const last = logAll.slice(-5);
     over.innerHTML = `<div><h1>力つきた……</h1><p>死因：<b style="color:#ff6b6b">${P.cause || 'なぞ'}</b></p><p>地下${G.f}階 ／ Lv${P.lv} ／ ${P.turn}ターン ／ ${P.gold}G</p><div class="last"><div>さいごの流れ</div>${last.map(l => `<div>・${l}</div>`).join('')}</div>${bestLine()}${jobLineHtml()}${bankLine}${again}</div>`; }
   if (kind === 'clear') over.innerHTML = `<div><h1>でかこわの王を たおした！</h1><p>${P.turn}ターンで クリア ／ Lv${P.lv} ／ ${P.gold}ゴールド</p>${shareBoxHtml(rec)}${jobLineHtml()}${bankLine}${again}</div>`;
-  wireShare(); wireTitleSave(); wireJobSel(); const gt = document.getElementById('goTitle'); if (gt) gt.onclick = () => { showOver('title'); render(); }; const gr = document.getElementById('goRec'); if (gr) gr.onclick = showRecords;
+  wireShare(); wireTitleSave(); wireJobSel(); wireDiffSel(); const gt = document.getElementById('goTitle'); if (gt) gt.onclick = () => { showOver('title'); render(); }; const gr = document.getElementById('goRec'); if (gr) gr.onclick = showRecords;
   document.getElementById('go').onclick = () => pickStart('random');
   document.getElementById('goDaily').onclick = () => pickStart('daily');
-  const gh = document.getElementById('goHero'); if (gh) gh.onclick = showHero;
+  const gh = document.getElementById('goHero'); if (gh) gh.onclick = showHero; const gc = document.getElementById('goCol'); if (gc) gc.onclick = () => showCollection();
   const gs = document.getElementById('goSame'); if (gs) gs.onclick = () => runMode === 'daily' ? pickStart('daily') : pickStart('pw', password, LAST);
   const gp = document.getElementById('goPw'); if (gp) { const inp = document.getElementById('pwIn'); try { inp.value = localStorage.getItem('aikotoba_lastpw') || ''; } catch (e) {}
     const dsel = document.getElementById('depthIn'); try { const ld = localStorage.getItem('aikotoba_lastdepth'); if (ld) dsel.value = ld; } catch (e) {}

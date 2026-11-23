@@ -36,7 +36,7 @@ function drawTitle(tt) {
   const hy = Math.round(dy + dh - 18 * ms), hop = k => Math.round(Math.abs(Math.sin(tt * 3 + k)) * -1);
   put(S.uutan, Math.round(dx - 12 * ms), hy + hop(1), ms);
   put(S.tamezou, Math.round(dx + dw - 4 * ms), hy + hop(2), ms);
-  put(heroSprite(curJob), Math.round(Wd / 2 - 9 * ms), hy + 6 * ms + hop(0), ms);
+  put(heroLook(curJob), Math.round(Wd / 2 - 9 * ms), hy + 6 * ms + hop(0), ms);
   // ちり
   g.fillStyle = 'rgba(255,220,180,.5)'; for (const d of dust) { d.y -= .002 * d.s; d.x += Math.sin(tt + d.y * 9) * .0007; if (d.y < 0) { d.y = 1; d.x = Math.random(); } g.fillRect(Math.round(d.x * Wd), Math.round(d.y * Ht), Z, Z); }
   // 画面のふち

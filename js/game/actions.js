@@ -21,7 +21,7 @@ function act(dx, dy) {
   if (shopAt(nx, ny)) { openShop(); return; }
   if (npcAt(nx, ny)) { talkFriend(); return; }
   if (!isFloor(nx, ny)) { render(); return; }
-  P.x = nx; P.y = ny; step(); endTurn();
+  P.x = nx; P.y = ny; iceSlide(dx, dy); step(); endTurn();
 }
 function elemHit(m, d, el, label) { const md = MON[m.t]; let note = ''; d = Math.round(d * magicPower);
   if (el && md.weak === el) { d = Math.round(d * 1.6); note = '　こうかは ばつぐんだ！'; } else if (el && md.resist === el) { d = Math.max(1, Math.round(d * .5)); note = '　あまり きいていない……'; }
@@ -32,7 +32,9 @@ function killMon(m) {
   if (!G.mons.includes(m)) return;
   G.mons = G.mons.filter(o => o !== m); sfx('kill');
   const ex = Math.round((m.exp || MON[m.t].exp) * (m.boss ? 5 : 1) * (hasTrait('manabi') ? 1.2 : 1)); say(`${m.name}を たおした！ ${ex}の けいけんち。`); if (jobHas('drain') && P.mp < P.mmp) { P.mp = Math.min(P.mmp, P.mp + 2); say('まりょくを すいとって MPが 2 もどった。'); } gainExp(ex); addJobExp(ex); noteKill(m.t);
-  if (m.loot) { const p = freeNear(m.x, m.y); if (p) { G.items.push(m.loot.gold ? { ...p, k: 'gold', amt: m.loot.gold } : { ...p, k: m.loot.o.k, o: m.loot.o }); say('ぬすまれた物を とりかえした！'); } }
+  if (hasTrait('kinkiri') && !m.ally) { const g = 5 * G.f; P.gold += g; say(`こがねぎり：${g}ゴールド 手に入れた。`); }
+  if (m.mid) midBossDrop(m);
+  else if (m.loot) { const p = freeNear(m.x, m.y); if (p) { G.items.push(m.loot.gold ? { ...p, k: 'gold', amt: m.loot.gold } : { ...p, k: m.loot.o.k, o: m.loot.o }); say('ぬすまれた物を とりかえした！'); } }
   else if (m.elite) { const p = freeNear(m.x, m.y); if (p) { const kk = rnd() < .3 ? pick(ARMOR_POOL) : rnd() < .5 ? pick(GEM_POOL) : pick(G.pool); const o = kk === 'gold' ? undefined : newItem(kk, 'floor'); G.items.push({ ...p, k: kk, o, amt: ri(60, 150) * G.f }); say(`${m.name}は いいものを 落とした！`); } }
   else if (rnd() < .07) { const p = freeNear(m.x, m.y); if (p) { const kk = rnd() < .04 ? 'diamond' : pick(GEM_POOL); G.items.push({ ...p, k: kk, o: newItem(kk, 'floor') }); say(`${m.name}は ${ITEMS[kk].name}を 落とした！`); } }
   else if (rnd() < .1) { const p = freeNear(m.x, m.y); if (p) { G.items.push({ ...p, k: pick(G.pool), amt: ri(20, 80) * G.f }); say(`${m.name}は 何かを 落とした。`); } }
@@ -41,11 +43,17 @@ function killMon(m) {
 }
 function attack(m, mul = 1, normal = false) {
   attackAnim(m);
-  let d = Math.max(1, Math.round(dmg(atkTotal(), m.def) * mul * (hasTrait('gakeppuchi') && P.hp <= P.mhp * .3 ? 1.5 : 1)));
-  const crit = normal && jobHas('crit') && rnd() < .2; if (crit) { d *= 2; shake(4); say('かいしんの いちげき！'); }
-  if ((hasTrait('dekakiller') && m.t === 'dekakowa') || (hasTrait('robokiller') && m.t === 'robo')) d *= 2;
+  if (P.charge) { P.charge = 0; mul *= 2.5; say('ためた 力を ときはなった！'); }
+  let d = Math.max(1, Math.round(dmg(atkTotal(), m.def) * mul * (hasTrait('gakeppuchi') && P.hp <= P.mhp * .3 ? 1.5 : 1) * (normal && jobHas('brave') ? 1.25 : 1)));
+  const crit = normal && ((jobHas('crit') && rnd() < .2) || (hasTrait('kaishin') && rnd() < .125)); if (crit) { d *= 2; shake(4); say('かいしんの いちげき！'); }
+  if ((hasTrait('dekakiller') && monFam(m.t) === 'dekakowa') || (hasTrait('robokiller') && monFam(m.t) === 'robo')) d *= 2;
+  if (hasTrait('nushikiller') && (m.mid || m.boss)) d = Math.round(d * 1.5);
   sfx(crit || mul >= 2.5 ? 'crit' : 'hit'); if (hasTrait('kyuketsu')) P.hp = Math.min(P.mhp, P.hp + 1);
-  const w = eqItem('atk'); return elemHit(m, d, hasTrait('honoo') ? 'fire' : hasTrait('koori') ? 'ice' : (w && ITEMS[w.k].el) || null);
+  if (hasTrait('mpkyuu') && rnd() < 1 / 3) P.mp = Math.min(P.mmp, P.mp + 1);
+  const w = eqItem('atk'), r = elemHit(m, d, hasTrait('honoo') ? 'fire' : hasTrait('koori') ? 'ice' : hasTrait('ikazuchi') ? 'thunder' : (w && ITEMS[w.k].el) || null);
+  if (G.mons.includes(m) && hasTrait('hirumi') && rnd() < .2) { m.stuck = Math.max(m.stuck || 0, 1); say(`${m.name}は ひるんだ！`); }
+  if (normal && G.mons.includes(m) && hasTrait('rengeki') && rnd() < 1 / 6) { say('れんげき！ もう1回！'); attack(m); }
+  return r;
 }
 function gainExp(e) { P.exp += e; while (P.exp >= P.lv * 10) { P.exp -= P.lv * 10; P.lv++; P.mhp += 7; P.mmp += 3; P.hp = P.mhp; P.mp = P.mmp; P.food = 100; P.atk += 1; jobLevelUp(); P.hp = P.mhp; P.mp = P.mmp;
   say(`レベルが ${P.lv} に あがった！ HP・MP・おなかが ぜんぶ 回復した。`); levelUpJingle(); showBanner(`レベル ${P.lv}！`, 'HP・MP・おなかが ぜんぶ 回復');
@@ -54,7 +62,7 @@ const expNext = () => P.lv * 10 - P.exp;
 function step() {
   const it = G.items.find(o => o.x === P.x && o.y === P.y);
   if (it) {
-    if (it.k === 'gold') { const amt = Math.round(it.amt * (jobHas('merchant') ? 1.5 : 1) * (hasTrait('kinun') ? 1.3 : 1)); P.gold += amt; say(`${amt}ゴールド ひろった。`); sfx('pick'); G.items = G.items.filter(o => o !== it); }
+    if (it.k === 'gold') { const amt = Math.round(it.amt * (jobHas('merchant') ? 1.5 : 1) * (hasTrait('kinun') ? 1.3 : 1) * (ruleIs('gold') ? 2 : 1)); P.gold += amt; say(`${amt}ゴールド ひろった。`); sfx('pick'); G.items = G.items.filter(o => o !== it); }
     else {
       const o = it.o || newItem(it.k, 'floor');
       if (jobHas('alchemy') && ITEMS[o.k].cat === 'wand' && !o.alch) { o.alch = true; o.n = (o.n || 0) + 2; }
@@ -75,6 +83,7 @@ function step() {
 const furiMax = () => LAST > 10 ? 2 : 1;
 function trap(k) {
   const n = TRAPS[k].name; sfx('trap');
+  if (hasTrait('wanayoke') && rnd() < 1 / 3) { say(`${n}を ふんだが、わなよけで ひらりと かわした。`); return; }
   if (k === 'spike' && hasTrait('togeyoke')) { say(`${n}を ふんだが、トゲよけで なんともない。`); return; }
   if (k === 'spike') { const d = 5 + G.f; P.hp -= d; P.flash = 6; P.cause = n; shake(5); say(`${n}を ふんだ！ ${d}の ダメージ。`); }
   if (k === 'hole') { if (G.f < LAST) { fallSound(); enterFloor(G.f + 1); shake(10); say(`${n}だ！ ひゅ〜〜…… ドスン！ 地下${G.f}階に おちた。`); showBanner('ひゅ〜〜…… ドスン！', `おとし穴で 地下${G.f}階に おちた`); } else say(`${n}だ！ ……と思ったら、そこは浅かった。`); }
@@ -102,20 +111,21 @@ function useObj(o, list) {
       if (cur && cur.cursed) { cur.curseKnown = true; sfx('bad'); say(`${itemName(cur)}が のろわれていて 付けかえられない！`); render(); return; }
       if (cur) { cur.eq = false; say(`${itemName(cur)}は もちものに もどした。`); } o.eq = true;
       if (o.cursed) { o.curseKnown = true; sfx('bad'); shake(6); say(`${itemName(o)}を そうびした……のろわれていた！ はずせない！`); }
-      else say(`${itemName(o)}を そうびした。（${itemDesc(o)}）`); }
+      else say(`${itemName(o)}を そうびした。（${itemDesc(o)}）`); progAdd('used', o.k); }
     tidyEq(); endTurn(); return;
   }
   if (it.bag) { openBag(o); return; }
   if (o.k === 'omamori') { say(it.use()); render(); return; }
   if (it.need && it.need()) { say(it.need()); render(); return; }  // つかえない ときは へらさない
+  progAdd('used', o.k);
   if (o.unpaid) { say('お金を はらう前に 使ってしまった！'); delete o.unpaid; angerShop(); }
-  if (it.cat && !P.known.has(o.k)) { P.known.add(o.k); say(`${FAKE[o.k]}を 使った。……${it.name}だった！`); }
+  if (it.cat && !isKnown(o.k)) { P.known.add(o.k); say(`${FAKE[o.k]}を 使った。……${it.name}だった！`); }
   sfx(itemSound(it));
   const hp0 = P.hp, food0 = P.food;
   const msg = it.cat === 'wand' || it.cat === 'scroll' || o.k === 'g_fire' ? withMagic(() => it.use(P, o)) : it.use(P, o); if (typeof msg === 'string') say(msg);
   if (jobHas('alchemy') && it.cat === 'grass') { P.mp = Math.min(P.mmp, P.mp + 5); say('れんきんの ちしきで MPが 5 もどった。'); }
   // どうぐつかい：回復の 道具が 1.5倍
-  if (jobHas('items') && (P.hp > hp0 || P.food > food0)) { const eh = Math.min(P.mhp - P.hp, Math.round((P.hp - hp0) * .5)), ef = Math.min(100 - P.food, Math.round((P.food - food0) * .5)); P.hp += eh; P.food += ef; if (eh + ef > 0) say(`どうぐつかいの うでで さらに ${eh ? 'HP＋' + eh : ''}${eh && ef ? '・' : ''}${ef ? 'おなか＋' + ef : ''}。`); }
+  if ((jobHas('items') || hasTrait('kaifuku')) && (P.hp > hp0 || P.food > food0)) { const eh = Math.min(P.mhp - P.hp, Math.round((P.hp - hp0) * .5)), ef = Math.min(100 - P.food, Math.round((P.food - food0) * .5)); P.hp += eh; P.food += ef; if (eh + ef > 0) say(`どうぐつかいの うでで さらに ${eh ? 'HP＋' + eh : ''}${eh && ef ? '・' : ''}${ef ? 'おなか＋' + ef : ''}。`); }
   if (it.cat === 'wand' || it.keep) { /* 杖と ほうせきは のこる */ }
   else if (it.stack) { o.n--; if (o.n <= 0) list.splice(list.indexOf(o), 1); }
   else { const j = list.indexOf(o); if (j >= 0) list.splice(j, 1); }
@@ -144,7 +154,7 @@ function dropItem(i) {
   if (o.unpaid) { it.price = o.unpaid; delete o.unpaid; say(`${itemName(o)}を お店に もどした。`); } else say(`${itemName(o)}を 足もとに おいた。`);
   G.items.push(it); endTurn();
 }
-function descend() { if (G.over) return; if (P.x === G.stairs.x && P.y === G.stairs.y) { if (G.f >= LAST) { say('この先は、でかこわの王を たおさないと 開かない。'); render(); return; } stairsSound(); enterFloor(G.f + 1); say(`地下${G.f}階に おりた。`); render(); } }
+function descend() { if (G.over) return; if (P.x === G.stairs.x && P.y === G.stairs.y) { if (midBossAlive()) { say('ぬしを たおさないと、階段は ふういんされていて おりられない。'); render(); return; } if (G.f >= LAST) { say('この先は、でかこわの王を たおさないと 開かない。'); render(); return; } stairsSound(); enterFloor(G.f + 1); say(`地下${G.f}階に おりた。`); render(); } }
 function angerShop() { if (!G.shop) return; const { x, y } = G.shop; G.shop = null; addMon(G, 'keeper', x, y);
   for (const o of P.inv) delete o.unpaid; for (const it of G.items) delete it.price;
   shake(12); sfx('alarm'); showBanner('どろぼうーーっ！！', '店主が おこった'); say('店主「どろぼうーーっ！！」 店主が おこって おそってきた！'); }
@@ -152,26 +162,36 @@ function spawnFar() { const rs = G.rooms.filter(r => !roomOf2(r, P.x, P.y)); con
   const x = ri(r.x, r.x + r.w - 1), y = ri(r.y, r.y + r.h - 1); if (monAt(x, y) || blockedAt(x, y)) return; addMon(G, pick(monPool(G.f).filter(t => !MON[t].big)), x, y); }
 function endTurn() {
   P.turn++; G.ft++;
-  if (P.turn % (hasTrait('haramochi') ? 12 : 6) === 0) { if (P.food > 0) P.food--; else { P.hp -= 1; P.cause = 'はらぺこ'; say('おなかが へって 動けない……。'); } }
+  if (P.turn % ((hasTrait('haramochi') ? 12 : 6) / (ruleIs('hunger') ? 2 : 1)) === 0) { if (P.food > 0) P.food--; else { P.hp -= 1; P.cause = 'はらぺこ'; say('おなかが へって 動けない……。'); } }
   if (P.turn % 5 === 0 && P.food > 0) P.hp = Math.min(P.mhp, P.hp + 1);
   if (P.turn % 4 === 0 && P.food > 0) P.mp = Math.min(P.mmp, P.mp + 1);
   if (hasTrait('saisei') && P.turn % 3 === 0 && P.food > 0) P.hp = Math.min(P.mhp, P.hp + 1);
   if (hasTrait('maryoku') && P.turn % 5 === 0) P.mp = Math.min(P.mmp, P.mp + 1);
   if (jobHas('sage') && P.turn % 3 === 0) P.mp = Math.min(P.mmp, P.mp + 1);
+  if (P.bunshin > 0 && !--P.bunshin) say('分身が きえた。');
+  if (P.teppeki > 0 && !--P.teppeki) say('まもりの かまえが とけた。'); if (P.mikiri > 0) P.mikiri--;
   for (const m of [...G.mons]) { if (G.over) break; monTurn(m); if (MON[m.t].fast && G.mons.includes(m)) monTurn(m); }
+  noteTurn(); if (typeof checkInvent === 'function') checkInvent();
   if (G.ft === 300) say('どこからか 地ひびきが する……。長く いすぎると あぶない。');
   if (G.ft > 330 && G.ft % 15 === 0) { spawnFar(); say('どこかで 敵が 生まれた けはいがする。'); }
   if (G.shopRoom && G.shop) { const inShop = roomOf2(G.shopRoom, P.x, P.y); if (P.wasInShop && !inShop && P.inv.some(o => o.unpaid)) angerShop(); P.wasInShop = inShop; }
   if (G.house && !G.houseWoke && roomOf(P.x, P.y) === G.house) { G.houseWoke = true; for (const m of G.mons) m.sleep = false; P.flash = 10; shake(10); sfx('house'); showBanner('モンスターハウス！', ''); say('モンスターハウスだ！！ 敵が いっせいに 目を さました！'); }
   { const pin = P.hp > 0 && P.hp <= P.mhp * .25; if (pin && !P.pinch) { say('HPが のこり わずか！ 回復するか にげよう！'); showBanner('HPが あぶない！', '回復するか にげよう'); sfx('siren'); } P.pinch = pin; }
+  if (P.hp <= 0 && !G.over && hasTrait('fumibari') && P.fumiF !== G.f) { P.fumiF = G.f; P.hp = 1; shake(6); showBanner('ふんばった！', 'HP 1で たえた'); say('ふんばり！ HP 1で もちこたえた。（この階では あと 0回）'); }
   if (P.hp <= 0 && !G.over) { const om = P.inv.find(o => o.k === 'omamori');
     if (om) { P.inv.splice(P.inv.indexOf(om), 1); P.hp = P.mhp; P.food = Math.max(P.food, 30); shake(10); sfx('lvup'); showBanner('いのちのお守り！', '1回だけ 復活した'); say('……いのちのお守りが くだけちった。HPが ぜんぶ 回復して 立ちあがった！'); }
     else { P.hp = 0; G.over = 'dead'; showOver('dead'); } }
+  if (P.warp) { const w = P.warp; P.warp = null; if (!G.over) warpFloor(w.n, w.how); }
   reveal(); render();
 }
 function monTurn(m) {
   if (m.sleep) return;
   if (m.stuck > 0) { m.stuck--; return; }
+  if (m.poison > 0) { m.poison--; hitMon(m, m.poisonD || 3, `${m.name}は 毒で ${m.poisonD || 3}の ダメージ。`); if (!G.mons.includes(m)) return; }
+  // こんらん：でたらめに 1歩 うごく（こうげき しない）
+  if (m.confuse > 0) { m.confuse--; const dx = ri(-1, 1), dy = ri(-1, 1), nx = m.x + dx, ny = m.y + dy;
+    if ((dx || dy) && isFloor(nx, ny) && !monAt(nx, ny) && !blockedAt(nx, ny) && !(nx === P.x && ny === P.y)) { m.x = nx; m.y = ny; } return; }
+  if (MON[m.t].regen && m.hp < m.mhp) m.hp = Math.min(m.mhp, m.hp + Math.max(1, Math.round(m.mhp * .05)));
   const d = MON[m.t]; const dist = Math.max(Math.abs(m.x - P.x), Math.abs(m.y - P.y));
   if (m.flee) { let best = null, bd = dist; for (let ax = -1; ax <= 1; ax++) for (let ay = -1; ay <= 1; ay++) { const nx = m.x + ax, ny = m.y + ay;
       if ((ax || ay) && isFloor(nx, ny) && !monAt(nx, ny) && !blockedAt(nx, ny) && !(nx === P.x && ny === P.y)) { const nd = Math.max(Math.abs(nx - P.x), Math.abs(ny - P.y)); if (nd > bd) { bd = nd; best = [nx, ny]; } } }
@@ -183,12 +203,16 @@ function monTurn(m) {
       m.flee = true; sfx('bad'); return; }
     if (d.dance) { if (rnd() < .5 && !hasTrait('nekoyoke')) { P.skip = 1; P.skipMsg = ''; say(`${m.name}が おどっている。つられて おどってしまった。`); } else say(`${m.name}は ずっと おどっている。`); return; }
     monAnim(m);
+    if (P.bunshin > 0 || (jobHas('shadow') && rnd() < 1 / 3)) { sfx('dodge'); say(`${m.name}の こうげき！ ……分身が かわりに うけた。`); return; }
     if (jobHas('evade') && rnd() < (jobHas('nimble') ? .4 : .25)) { sfx('dodge'); say(`${m.name}の こうげき！ ……ひらりと よけた。`); if (jobHas('nimble')) { say('すかさず はんげき！'); attack(m, .6); } return; }
+    if (P.mikiri > 0) { sfx('dodge'); say(`${m.name}の こうげき！ ……みきって よけた。`); return; }
     if (hasTrait('mikawashi') && rnd() < .125) { sfx('dodge'); say(`${m.name}の こうげき！ ……みかわしで よけた。`); return; }
-    let dd = dmg(m.atk, defTotal()); if (eqPerk('guard')) dd = Math.max(1, dd - 1);
+    let dd = dmg(m.atk, defTotal()); if (eqPerk('guard')) dd = Math.max(1, dd - 1); if (P.teppeki > 0) dd = Math.max(1, Math.round(dd / 2));
     if (hasTrait('robomamori') && /^robo/.test(m.t)) dd = Math.max(1, Math.round(dd / 2));
     if (hasTrait('dekamamori') && (/^dekakowa/.test(m.t) || m.boss)) dd = Math.max(1, Math.round(dd * .75)); if (jobHas('illusion')) dd = Math.max(1, Math.round(dd * .75)); P.hp -= dd; P.flash = 6; P.cause = m.name; sfx('hurt'); if (dd >= 8) shake(4);
     say(`${m.name}の こうげき！ ${dd}の ダメージ。`);
+    if (d.hunger && P.food > 0) { P.food = Math.max(0, P.food - 5); say('おなかが へった……（おなか −5）'); }
+    if (d.mpdrain && P.mp > 0) { P.mp = Math.max(0, P.mp - 2); say('まりょくを すいとられた。（MP −2）'); }
     if (hasTrait('hanekaeshi')) { const r = Math.ceil(dd / 2); hitMon(m, r, `はねかえし！ ${m.name}に ${r}の ダメージ。`); }
     return;
   }

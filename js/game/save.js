@@ -7,7 +7,7 @@ let floorStart = null;  // 階に 入った しゅんかんの 状態（enterFlo
 
 function snapshot() {
   const inv = P.inv.map(o => { const c = JSON.parse(JSON.stringify(o)); delete c.unpaid; return c; });
-  return { v: 1, mode: runMode, pw: password, daily, depth: LAST, f: G.f, seed,
+  return { v: 1, mode: runMode, pw: password, daily, depth: LAST, diff: runDiff, f: G.f, seed,
     p: { hp: P.hp, mhp: P.mhp, mp: P.mp, mmp: P.mmp, atk: P.atk, def: P.def, lv: P.lv, exp: P.exp, food: P.food, gold: P.gold, turn: P.turn, job: P.job, startF: P.startF || 1, furi: P.furi || 0, backF: P.backF || 0, inv },
     known: [...P.known], visits: { ...P.visits } }; }
 // 階に 入るたびに よぶ：その時点を おぼえて、この端末にも 自動で セーブする
@@ -19,7 +19,7 @@ function clearLocalSave() { try { localStorage.removeItem(SAVE_KEY); } catch (e)
 // セーブデータから 再開する
 function restoreSave(s) {
   previewRun = false;
-  runMode = s.mode; password = s.pw; daily = s.daily || ''; setupDungeon(s.depth);
+  runMode = s.mode; password = s.pw; daily = s.daily || ''; runDiff = diffOf(s.diff)[0]; setupDungeon(s.depth);
   Object.assign(P, { dir: [0, 1], skip: 0, cause: '', wasInShop: false, pinch: false, furi: 0, backF: 0 }, s.p, { inv: s.p.inv, known: new Set(s.known), visits: { ...s.visits } });
   P.visits[s.f] = (P.visits[s.f] || 1) - 1;  // enterFloor で 1 ふえるので、同じ地図に なるよう もどしておく
   logs.length = 0; logAll.length = 0; enterFloor(s.f); seed = s.seed; hideOver();
